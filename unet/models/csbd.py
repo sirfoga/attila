@@ -1,6 +1,6 @@
 def conv_block2(n_filter, n1, n2,
                 activation="relu",
-                border_mode="same",
+                padding="same",
                 dropout=0.0,
                 batch_norm=False,
                 init="glorot_uniform",
@@ -8,11 +8,11 @@ def conv_block2(n_filter, n1, n2,
 
     def _func(lay):
         if batch_norm:
-            s = Conv2D(n_filter, (n1, n2), padding=border_mode, kernel_initializer=init, **kwargs)(lay)
+            s = Conv2D(n_filter, (n1, n2), padding=padding, kernel_initializer=init, **kwargs)(lay)
             s = BatchNormalization()(s)
             s = Activation(activation)(s)
         else:
-            s = Conv2D(n_filter, (n1, n2), padding=border_mode, kernel_initializer=init, activation=activation, **kwargs)(lay)
+            s = Conv2D(n_filter, (n1, n2), padding=padding, kernel_initializer=init, activation=activation, **kwargs)(lay)
         if dropout is not None and dropout > 0:
             s = Dropout(dropout)(s)
         return s
@@ -136,11 +136,13 @@ def custom_unet(input_shape,
 
     return Model(inputs=input, outputs=final)
 
-def common_unet(n_dim=2, n_depth=1, kern_size=3, n_first=16, n_channel_out=1, residual=True, prob_out=False, last_activation='linear'):
+
+def common_unet(n_dim=2, n_depth=1, kern_size=3, n_first=64, dropout=0.5, n_channel_out=1, residual=True, prob_out=False, last_activation='linear'):
     def _build_this(input_shape):
-        return custom_unet(input_shape, last_activation, n_depth, n_first, (kern_size,)*n_dim, pool_size=(2,)*n_dim, n_channel_out=n_channel_out, residual=residual, prob_out=prob_out)
+        return custom_unet(input_shape, last_activation, n_depth, n_first, (kern_size,)*n_dim, dropout=dropout, pool_size=(2,)*n_dim, n_channel_out=n_channel_out, residual=residual, prob_out=prob_out)
     return _build_this
 
-model = common_unet(2, 1, 3, 32, 1, True, False, 'relu')(input_shape)
+
+model = common_unet(last_activation='relu')(input_shape)
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 # model.summary()

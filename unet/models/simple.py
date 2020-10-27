@@ -1,5 +1,6 @@
 def unet(input_size, dropout, batch_norm):
     inputs = Input(input_size)
+    
     conv1 = Conv2D(64, 3, activation = 'relu', padding = 'same', kernel_initializer = 'he_normal')(inputs)
     if batch_norm:
         conv1 = BatchNormalization(axis=3)(conv1)
@@ -62,6 +63,6 @@ def unet(input_size, dropout, batch_norm):
     return Model(inputs = inputs, outputs = conv10)
 
 
-model = unet(input_shape, 0.6, False)
+model = unet(input_shape, 0.5, False)
 model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
 # model.summary()
