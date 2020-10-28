@@ -61,7 +61,7 @@ def get_unet(input_img, n_filters=16, dropout=0.5, batchnorm=True):
 
 
 input_img = Input(input_shape, name='img')
-model = get_unet(input_img, n_filters=16, dropout=0.5, batchnorm=True)
+model = get_unet(input_img, n_filters=64, dropout=0.5, batchnorm=True)
 
 model.compile(optimizer=Adam(), loss="binary_crossentropy", metrics=["accuracy"])
 model.summary()
