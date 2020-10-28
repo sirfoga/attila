@@ -1,4 +1,6 @@
 data/
+*.h5
+*core.taurusml*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
