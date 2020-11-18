@@ -76,14 +76,14 @@ def plot_history(experiments, out_path, last=None):
 
       ax.set_title(title)
 
-  for ax, experiment in zip(axis.ravel(), experiments):
+  for a, experiment in zip(ax.ravel(), experiments):
       history = experiment['history']
       results = {
         k: history[k][-last:]
         for k in history.keys()
       }
 
-      _plot_results(results, ax, experiment['name'])
+      _plot_results(results, a, experiment['name'])
 
   fig.savefig(out_path)
   plt.close(fig)

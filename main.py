@@ -2,9 +2,10 @@ from pathlib import Path
 import numpy as np
 
 from util.config import get_config
-from util.plots import plot_sample, plot_preds
+from util.plots import plot_preds, plot_history
 
 from data.parse import parse_data, get_data
+from data.experiments import load_experiments, save_experiments
 
 from nn.models.unet import calc_out_size, build as build_model
 from nn.metrics import mean_IoU, DSC
@@ -40,7 +41,7 @@ def get_default_args(config):
   return model_args, compile_args
 
 
-def do_experiment(experiment, data, config, out_path):
+def do_experiment(experiment, data, config, out_path):  # todo refactor
   def _fix_data_shape(img_out_shape):
     def _f(x):
       output_shape = (*img_out_shape, config.getint('image', 'depth'))
@@ -123,8 +124,7 @@ def do_experiment(experiment, data, config, out_path):
   return results, stats
 
 
-
-def do_experiments(experiments, data, config, out_path):
+def do_experiments(experiments, data, config, out_path):  # todo refactor
   if config.getint('experiments', 'verbose'):
     print('ready to perform {} experiments'.format(len(experiments)))
 
@@ -141,59 +141,15 @@ def do_experiments(experiments, data, config, out_path):
       print('=== experiment # {} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
 
     data = (X_train, X_val, X_test, y_train, y_val, y_test)
-    results, stats = do_experiment(experiment, data, config, out_path)
-    # todo get results.history
+    results, eval_stats = do_experiment(experiment, data, config, out_path)
 
+    experiments[i]['history'] = results.history
+    experiments[i]['eval'] = eval_stats
 
-def try_out(data, config, out_path):
-  """ do evaluation of U-Net """
+  last_epochs = int(config.getint('training', 'epochs') * 0.8)
+  plot_history(experiments, out_path / 'history.png', last=last_epochs)
 
-  X, y = data  # unpack
-  X_train, X_val, X_test, y_train, y_val, y_test = train_validate_test_split(
-    X,
-    y,
-    config.getfloat('experiment', 'val size'),
-    config.getfloat('experiment', 'test size')
-  )
-
-  if config.getint('experiments', 'verbose'):
-    describe(X_train, X_val, X_test, y_train, y_val, y_test)
-
-  plot_sample(X, y, cmap=config.get('image', 'cmap'), out_folder=out_path)
-
-  model_args, compile_args = get_default_args(config)
-  args = {
-    **model_args,
-    'padding': 'same',
-    'use_skip_conn': True,
-    'use_se_block': False
-  }
-  model = build_model(**args)
-  weights_file = str(get_weights_file(out_path, 'wow'))
-
-  results = do_training(
-    model,
-    X_train,
-    X_val,
-    y_train,
-    y_val,
-    weights_file,
-    config.getint('training', 'batch size'),
-    config.getint('training', 'epochs'),
-    compile_args,
-    config.getint('experiments', 'verbose')
-  )
-  print(history)
-
-  stats = do_evaluation(
-    model,
-    weights_file,
-    X_test,
-    y_test,
-    config.getint('training', 'batch size'),
-    config.getint('experiments', 'verbose')
-  )
-  print(stats)
+  return experiments
 
 
 def main():
@@ -213,7 +169,11 @@ def main():
     (config.getint('image', 'width'), config.getint('image', 'height'))
   )
 
-  try_out((X, y), config, out_path)
+  experiments_file = _here / config.get('experiments', 'output file')
+  experiments = load_experiments(experiments_file)
+  do_experiments(experiments, (X, y), config, out_path)
+
+  save_experiments(experiments, out_path / config.get('experiments', 'output file'))
 
 
 if __name__ == '__main__':

@@ -1,3 +1,6 @@
 keras
 tensorflow
 scikit-learn
+configparser
+matplotlib
+numpy
