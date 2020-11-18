@@ -1,6 +1,6 @@
 from tensorflow.keras import Input, Model
 from tensorflow.keras.layers import MaxPooling2D, Conv2D, UpSampling2D, concatenate, Cropping2D
-from .blocks import se_block, conv2d_block
+from attila.nn.models.blocks import se_block, conv2d_block
 
 
 filter_mult = 2  # todo as arg

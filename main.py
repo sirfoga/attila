@@ -1,18 +1,18 @@
 from pathlib import Path
 import numpy as np
 
-from util.config import get_config
-from util.plots import plot_preds, plot_history
+from attila.util.config import get_config
+from attila.util.plots import plot_preds, plot_history
 
-from data.parse import parse_data, get_data
-from data.experiments import load_experiments, save_experiments
+from attila.data.parse import parse_data, get_data
+from attila.data.experiments import load_experiments, save_experiments
 
-from nn.models.unet import calc_out_size, build as build_model
-from nn.metrics import mean_IoU, DSC
-from nn.core import do_training, do_evaluation
+from attila.nn.models.unet import calc_out_size, build as build_model
+from attila.nn.metrics import mean_IoU, DSC
+from attila.nn.core import do_training, do_evaluation
 
-from data.prepare import train_validate_test_split, get_weights_file, get_model_output_folder, describe
-from data.trans import crop_center_transformation, apply_transformations
+from attila.data.prepare import train_validate_test_split, get_weights_file, get_model_output_folder, describe
+from attila.data.trans import crop_center_transformation, apply_transformations
 
 _here = Path('.').resolve()
 
