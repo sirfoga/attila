@@ -4,3 +4,4 @@ scikit-learn
 configparser
 matplotlib
 numpy
+tikzplotlib
