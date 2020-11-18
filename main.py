@@ -1,15 +1,17 @@
 from pathlib import Path
+import numpy as np
 
 from util.config import get_config
-from util.plots import plot_sample
+from util.plots import plot_sample, plot_preds
 
 from data.parse import parse_data, get_data
 
-from nn.models.unet import build as build_model
+from nn.models.unet import calc_out_size, build as build_model
 from nn.metrics import mean_IoU, DSC
 from nn.core import do_training, do_evaluation
 
-from data.prepare import train_validate_test_split, get_weights_file
+from data.prepare import train_validate_test_split, get_weights_file, get_model_output_folder, describe
+from data.trans import crop_center_transformation, apply_transformations
 
 _here = Path('.').resolve()
 
@@ -38,24 +40,95 @@ def get_default_args(config):
   return model_args, compile_args
 
 
-def main():
-  config = get_config(_here / './config.ini')
+def do_experiment(experiment, data, config, out_path):
+  def _fix_data_shape(img_out_shape):
+    def _f(x):
+      output_shape = (*img_out_shape, config.getint('image', 'depth'))
 
-  data_path = _here / config.get('data', 'folder')
-  data_path = data_path.resolve()
+      transformations = [
+        crop_center_transformation(output_shape),
+      ]
+      x = apply_transformations(x, transformations)  # reduce output size
+      x = np.array(x)
+      return x
 
-  out_path = Path(config.get('experiments', 'output folder')).resolve()
-  out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
+    return _f
 
-  # todo use experiments_file = out_path / config.get('experiment', 'output file')
 
-  images_path = data_path / config.get('data folder', 'images')
-  masks_path = data_path / config.get('data folder', 'masks')
-  raw = get_data(images_path, masks_path)
-  X, y = parse_data(
-    raw,
-    (config.getint('image', 'width'), config.getint('image', 'height'))
+  def _prepare_data(data):
+    (X_train, X_val, X_test, y_train, y_val, y_test) = data  # unpack
+
+    img_shape = y_train.shape[1: 2 + 1]  # width, height of input images
+    img_out_shape = calc_out_size(
+      config.getint('unet', 'n layers'),
+      2,
+      3,
+      2,
+      experiment['padding']
+    )(img_shape)
+
+    y_train = _fix_data_shape(img_out_shape)(y_train)
+    y_val = _fix_data_shape(img_out_shape)(y_val)
+    y_test = _fix_data_shape(img_out_shape)(y_test)
+
+    return (X_train, X_val, X_test, y_train, y_val, y_test)
+
+
+  (X_train, X_val, X_test, y_train, y_val, y_test) = _prepare_data(data)
+
+  if config.getint('experiments', 'verbose'):
+    describe(X_train, X_val, X_test, y_train, y_val, y_test)
+
+  model_args, compile_args = get_default_args(config)
+  args = {
+    **model_args,
+    'padding': experiment['padding'],
+    'use_skip_conn': experiment['use_skip_conn'],
+    'use_se_block': experiment['use_se_block']
+  }
+  model = build_model(**args)
+  weights_file = str(get_weights_file(out_path, experiment['name']))
+
+  results = do_training(
+    model,
+    X_train,
+    X_val,
+    y_train,
+    y_val,
+    weights_file,
+    config.getint('training', 'batch size'),
+    config.getint('training', 'epochs'),
+    compile_args,
+    config.getint('experiments', 'verbose')
   )
+
+  stats, preds = do_evaluation(
+    model,
+    weights_file,
+    X_test,
+    y_test,
+    config.getint('training', 'batch size'),
+    config.getint('experiments', 'verbose')
+  )
+
+  plot_preds(
+    X_test,
+    y_test,
+    preds,
+    cmap=config.get('image', 'cmap'),
+    title='model: {}'.format(experiment['name']),
+    out_folder=get_model_output_folder(out_path, experiment['name'])
+  )
+
+  return results, stats
+
+
+
+def do_experiments(experiments, data, config, out_path):
+  if config.getint('experiments', 'verbose'):
+    print('ready to perform {} experiments'.format(len(experiments)))
+
+  X, y = data  # unpack
   X_train, X_val, X_test, y_train, y_val, y_test = train_validate_test_split(
     X,
     y,
@@ -63,8 +136,30 @@ def main():
     config.getfloat('experiment', 'test size')
   )
 
-  print('X ~ {}, y ~ {}'.format(X.shape, y.shape))
-  plot_sample(X, y, cmap=config.get('image', 'cmap'), out_folder=_here)
+  for i, experiment in enumerate(experiments):
+    if config.getint('experiments', 'verbose'):
+      print('=== experiment # {} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
+
+    data = (X_train, X_val, X_test, y_train, y_val, y_test)
+    results, stats = do_experiment(experiment, data, config, out_path)
+    # todo get results.history
+
+
+def try_out(data, config, out_path):
+  """ do evaluation of U-Net """
+
+  X, y = data  # unpack
+  X_train, X_val, X_test, y_train, y_val, y_test = train_validate_test_split(
+    X,
+    y,
+    config.getfloat('experiment', 'val size'),
+    config.getfloat('experiment', 'test size')
+  )
+
+  if config.getint('experiments', 'verbose'):
+    describe(X_train, X_val, X_test, y_train, y_val, y_test)
+
+  plot_sample(X, y, cmap=config.get('image', 'cmap'), out_folder=out_path)
 
   model_args, compile_args = get_default_args(config)
   args = {
@@ -76,7 +171,7 @@ def main():
   model = build_model(**args)
   weights_file = str(get_weights_file(out_path, 'wow'))
 
-  history = do_training(
+  results = do_training(
     model,
     X_train,
     X_val,
@@ -99,6 +194,26 @@ def main():
     config.getint('experiments', 'verbose')
   )
   print(stats)
+
+
+def main():
+  config = get_config(_here / './config.ini')
+
+  data_path = _here / config.get('data', 'folder')
+  data_path = data_path.resolve()
+
+  out_path = Path(config.get('experiments', 'output folder')).resolve()
+  out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
+
+  images_path = data_path / config.get('data folder', 'images')
+  masks_path = data_path / config.get('data folder', 'masks')
+  raw = get_data(images_path, masks_path)
+  X, y = parse_data(
+    raw,
+    (config.getint('image', 'width'), config.getint('image', 'height'))
+  )
+
+  try_out((X, y), config, out_path)
 
 
 if __name__ == '__main__':

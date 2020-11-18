@@ -39,7 +39,7 @@ def do_inference(model, weights_file, X, batch_size, verbose):
   return model.predict(X, verbose=verbose, batch_size=batch_size)
 
 
-def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose, save_figs=True):
+def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
   metrics = [  # todo as arg
     {
       'name': 'mean IoU',
@@ -70,10 +70,6 @@ def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose, save
       metric_val = metric_f(y_test[ix], preds[ix]).numpy()
       stats[metric['name']].append(metric_val)
 
-    if save_figs:
-      pass
-      # todo save_pred(X_test, y_test, pred, ix, experiment['name'], out_folder)
-
   if verbose:
     print('=== evaluation stats')
     print('= metrics on test set (size: {})'.format(len(X_test)))
@@ -88,4 +84,4 @@ def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose, save
       )
       print(metric_out)
 
-  return stats
+  return stats, preds

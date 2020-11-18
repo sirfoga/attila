@@ -3,11 +3,23 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
+def get_figsize(n_rows, n_cols):
+  row_size = 4  # heigth
+  column_size = 5  # width
+
+  return (n_cols * column_size, n_rows * row_size)
+
+
+def get_figa(n_rows, n_cols):
+  fig, ax = plt.subplots(n_rows, n_cols, figsize=get_figsize(n_rows, n_cols))
+  return fig, ax
+
+
 def plot_sample(X, y, cmap='nipy_spectral', ix=None, out_folder=None):
   if ix is None:
     ix = random.randint(0, len(X) - 1)
 
-  fig, ax = plt.subplots(1, 3, figsize=(15, 4))
+  fig, ax = get_figa(1, 3)
 
   im = ax[0].imshow(X[ix, ..., 0], cmap=cmap)
   fig.colorbar(im, ax=ax[0])
@@ -22,7 +34,7 @@ def plot_sample(X, y, cmap='nipy_spectral', ix=None, out_folder=None):
   fig.suptitle('sample #{}'.format(ix))
   if out_folder:
     fig.savefig(out_folder / 'sample_{}.png'.format(ix))
-  
+
   plt.close(fig)
 
   return ix
@@ -34,7 +46,7 @@ def plot_history(experiments, out_path, last=None):
 
   n_cols = 2
   n_rows = int(np.ceil(len(experiments) / n_cols))
-  fig, axis = plt.subplots(n_rows, n_cols, figsize=(20, 4 * n_rows))
+  fig, ax = get_figa(n_rows, n_cols)
 
   def _plot_key_results(ax, key, results, color, find_min=False, find_max=False):
       training = results[key]
@@ -77,17 +89,21 @@ def plot_history(experiments, out_path, last=None):
   plt.close(fig)
 
 
-def save_pred(X, y, pred, ix, model_name, out_folder):
-  fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
+  for ix in range(len(preds)):
+    fig, ax = get_figa(1, 2)
 
-  ax[0].imshow(X[ix, ..., 0], cmap=config.get('image', 'cmap'))
-  ax[0].set_title('input image (sample #{})'.format(ix))
+    ax[0].imshow(X[ix, ..., 0], cmap=cmap)
+    ax[0].set_title('input image (sample #{})'.format(ix))
 
-  ax[1].imshow(pred[ix].squeeze(), cmap='gray')
-  ax[1].contour(y[ix].squeeze(), colors='yellow', levels=[0.5])
-  ax[1].set_title('prediction (ground truth as contour)')
+    ax[1].imshow(preds[ix].squeeze(), cmap='gray')
+    ax[1].contour(y[ix].squeeze(), colors='yellow', levels=[0.5])
+    ax[1].set_title('prediction (ground truth as contour)')
 
-  fig.suptitle('model: {}'.format(model_name))
+    if title:
+      fig.suptitle(title)
 
-  fig.savefig(out_folder / '{}.png'.format(ix))
-  plt.close(fig)
+    if out_folder:
+      fig.savefig(out_folder / '{}.png'.format(ix))
+
+    plt.close(fig)
