@@ -161,8 +161,8 @@ def main():
   out_path = Path(config.get('experiments', 'output folder')).resolve()
   out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
 
-  images_path = data_path / config.get('data folder', 'images')
-  masks_path = data_path / config.get('data folder', 'masks')
+  images_path = data_path / config.get('data', 'images')
+  masks_path = data_path / config.get('data', 'masks')
   raw = get_data(images_path, masks_path)
   X, y = parse_data(
     raw,

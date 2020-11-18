@@ -2,7 +2,7 @@ import numpy as np
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
-from metrics import mean_IoU, DSC
+from attila.nn.metrics import mean_IoU, DSC
 
 
 def do_training(model, X_train, X_val, y_train, y_val, model_file, batch_size, n_epochs, compile_args, verbose):
