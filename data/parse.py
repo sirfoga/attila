@@ -1,7 +1,7 @@
 from tifffile import imread
 import numpy as np
 
-from trans import rm_percentiles_transformation, normalize_transformation, crop_center_transformation, add_dim, apply_transformations
+from .trans import rm_percentiles_transformation, normalize_transformation, crop_center_transformation, add_dim, apply_transformations
 
 
 def load_tiff(f):
