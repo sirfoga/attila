@@ -1,3 +1,7 @@
+import numpy as np
+from tensorflow.keras import backend as K
+
+
 def eps_divide(n, d, eps=K.epsilon()):
   """ perform division using eps """
     

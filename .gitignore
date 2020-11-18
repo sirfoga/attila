@@ -4,6 +4,7 @@ data/
 *core.taurusml*
 *.json
 out/
+*/out/*
 .vscode/
 
 # Byte-compiled / optimized / DLL files
