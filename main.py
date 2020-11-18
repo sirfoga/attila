@@ -7,9 +7,8 @@ from data.parse import parse_data, get_data
 
 from nn.models.unet import build as build_model
 from nn.metrics import mean_IoU, DSC
-from nn.core import do_training, do_inference, do_evaluation
+from nn.core import do_training, do_evaluation
 
-from data.experiments import save as save_exp
 from data.prepare import train_validate_test_split, get_weights_file
 
 _here = Path('.').resolve()
@@ -18,7 +17,7 @@ _here = Path('.').resolve()
 def get_default_args(config):
   conv_kernel_size = 3
   pool_size = 2
-  
+
   model_args = {
     'n_filters': config.getint('unet', 'n filters'),
     'n_layers': config.getint('unet', 'n layers'),
@@ -76,6 +75,7 @@ def main():
   }
   model = build_model(**args)
   weights_file = str(get_weights_file(out_path, 'wow'))
+
   history = do_training(
     model,
     X_train,
@@ -88,15 +88,17 @@ def main():
     compile_args,
     config.getint('experiments', 'verbose')
   )
-  preds = do_inference(
+  print(history)
+
+  stats = do_evaluation(
     model,
     weights_file,
-    X_val,
+    X_test,
+    y_test,
     config.getint('training', 'batch size'),
     config.getint('experiments', 'verbose')
   )
-
-  # todo eval
+  print(stats)
 
 
 if __name__ == '__main__':
