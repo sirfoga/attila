@@ -40,7 +40,7 @@ def plot_sample(X, y, cmap='nipy_spectral', ix=None, out_folder=None):
     return ix
 
 
-def plot_history(experiments, out_path, last=None):
+def plot_history(experiments, last=None, out_folder=None):
     if last is None:
         last = 0
 
@@ -88,7 +88,8 @@ def plot_history(experiments, out_path, last=None):
 
         _plot_results(results, a, experiment['name'])
 
-    fig.savefig(out_path)
+    if out_folder:
+        fig.savefig(out_folder / '{history}.png'.format(ix))
 
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
@@ -107,5 +108,3 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
 
         if out_folder:
             fig.savefig(out_folder / '{}.png'.format(ix))
-
-        plt.close(fig)

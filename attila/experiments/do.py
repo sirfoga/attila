@@ -150,6 +150,6 @@ def do_experiments(experiments, data, config, out_path):    # todo refactor
         experiments[i]['eval'] = eval_stats
 
     last_epochs = int(config.getint('training', 'epochs') * 0.8)
-    plot_history(experiments, out_path / 'history.png', last=last_epochs)
+    plot_history(experiments, last=last_epochs, out_folder=out_path)
 
     return experiments
