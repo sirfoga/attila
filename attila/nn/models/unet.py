@@ -75,9 +75,11 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
 
 
 def middle_path(kernel_shape, padding, dropout, batchnorm):
+    use_se_block = False
+
     def _f(x):
         n_filters = int(x.shape[-1] * filter_mult)
-        x = conv2d_block(n_filters, kernel_shape, padding, dropout, batchnorm)(x)
+        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm)(x)
         return x
 
     return _f
@@ -96,7 +98,7 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
         if using_skip_conn:
             x = concatenate([x, skip_conn])
 
-        x = conv2d_block(n_filters, kernel_shape, padding, dropout, batchnorm)(x)
+        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm)(x)
         return x
 
     return _f

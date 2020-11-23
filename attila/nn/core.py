@@ -60,7 +60,7 @@ def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
     )
 
     stats = {
-        metric: []
+        metric['name']: []
         for metric in metrics
     }
 
