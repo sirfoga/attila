@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import tikzplotlib
 from matplotlib import pyplot as plt
 
 
@@ -87,7 +86,6 @@ def plot_history(experiments, last=None, out_folder=None):
 
     if out_folder:
         fig.savefig(out_folder / 'history.png')
-        # tikzplotlib.save(out_folder / 'history.pgf')
 
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
