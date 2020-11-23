@@ -5,6 +5,19 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLRO
 from attila.nn.metrics import mean_IoU, DSC
 
 
+def describe_model(model):
+    trainable_params = sum([np.prod(K.get_value(w).shape) for w in model.trainable_weights])
+    total_params = model.count_params()
+    non_trainable_params = total_params - trainable_params
+    n_layers = len(model.layers)
+
+    print('=== model')
+    print('= # layers: {}'.format(n_layers))
+    print('= # total params: {}'.format(total_params))
+    print('= # trainable params: {}'.format(trainable_params))
+    print('= # non-trainable params: {}'.format(non_trainable_params))
+
+
 def do_training(model, X_train, X_val, y_train, y_val, model_file, batch_size, n_epochs, compile_args, verbose):
     callbacks = [    # todo as arg
         EarlyStopping(patience=10, verbose=verbose),
@@ -13,15 +26,7 @@ def do_training(model, X_train, X_val, y_train, y_val, model_file, batch_size, n
     ]
 
     if verbose:
-        trainable_params = sum([np.prod(K.get_value(w).shape) for w in model.trainable_weights])
-        total_params = model.count_params()
-        non_trainable_params = total_params - trainable_params
-
-        print('=== model')
-        print('= # layers: {}'.format(len(model.layers)))
-        print('= # total params: {}'.format(total_params))
-        print('= # trainable params: {}'.format(trainable_params))
-        print('= # non-trainable params: {}'.format(non_trainable_params))
+        describe_model(model)
 
     model.compile(**compile_args)
     return model.fit(

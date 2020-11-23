@@ -35,6 +35,22 @@ def get_default_args(config):
     return model_args, compile_args
 
 
+def get_experiment_args(experiment, config):
+    model_args, compile_args = get_default_args(config)
+    args = {
+        **model_args,
+        'padding': experiment['padding'],
+        'use_skip_conn': experiment['use_skip_conn'],
+        'use_se_block': experiment['use_se_block']
+    }
+    return args, compile_args
+
+
+def get_model(experiment, config):
+    args, compile_args = get_experiment_args(experiment, config)
+    return build_model(**args), compile_args
+
+
 def do_experiment(experiment, data, config, out_path):    # todo refactor
     def _fix_data_shape(img_out_shape):
         def _f(x):
@@ -74,14 +90,7 @@ def do_experiment(experiment, data, config, out_path):    # todo refactor
     if config.getint('experiments', 'verbose'):
         describe(X_train, X_val, X_test, y_train, y_val, y_test)
 
-    model_args, compile_args = get_default_args(config)
-    args = {
-        **model_args,
-        'padding': experiment['padding'],
-        'use_skip_conn': experiment['use_skip_conn'],
-        'use_se_block': experiment['use_se_block']
-    }
-    model = build_model(**args)
+    model, compile_args = get_model(experiment, config)
     weights_file = str(get_weights_file(out_path, experiment['name']))
 
     results = do_training(
