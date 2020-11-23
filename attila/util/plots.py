@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import tikzplotlib
 from matplotlib import pyplot as plt
 
 
@@ -66,16 +67,14 @@ def plot_history(experiments, last=None, out_folder=None):
 
     def _plot_results(results, ax, title):
         _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.05], find_min=True)
-        ax.set_ylabel('log loss', color='C3')
-        ax.legend()
+        # ax.legend()
 
         ax = ax.twinx()    # instantiate a second axes that shares the same x-axis
 
         _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.9, 1], find_max=True)
         _plot_key(ax, 'DSC', results, 'C2', scale=[0.9, 1], find_max=True)
 
-        ax.set_ylabel('metrics', color='b')
-        ax.legend()
+        # ax.legend()
 
         ax.set_title(title)
 
@@ -89,7 +88,8 @@ def plot_history(experiments, last=None, out_folder=None):
         _plot_results(results, a, experiment['name'])
 
     if out_folder:
-        fig.savefig(out_folder / '{history}.png'.format(ix))
+        fig.savefig(out_folder / 'history.png')
+        # tikzplotlib.save(out_folder / 'history.pgf')
 
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
@@ -107,4 +107,4 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
             fig.suptitle(title)
 
         if out_folder:
-            fig.savefig(out_folder / '{}.png'.format(ix))
+            fig.savefig(out_folder / '{}.pgf'.format(ix))
