@@ -48,7 +48,8 @@ def create_tex_table_results(experiments):
             if experiment[key] == best_values[key]:
                 experiment[key] = '\\textbf{{{:.3f}}}'.format(experiment[key])
             else:
-                experiment[key] = '{:.3f}'.format(experiment[key])
+                delta = 100 - 100 * experiment[key] / best_values[key]
+                experiment[key] = '{:.3f} (-{:.1f} \%)'.format(experiment[key], delta)
 
         row_table = row_table_f.format(
             experiment['name'],

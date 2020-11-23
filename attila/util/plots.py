@@ -16,7 +16,7 @@ def get_figa(n_rows, n_cols):
     return fig, ax
 
 
-def plot_sample(X, y, cmap='nipy_spectral', ix=None, out_folder=None):
+def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     if ix is None:
         ix = random.randint(0, len(X) - 1)
 
@@ -35,8 +35,6 @@ def plot_sample(X, y, cmap='nipy_spectral', ix=None, out_folder=None):
     fig.suptitle('sample #{}'.format(ix))
     if out_folder:
         fig.savefig(out_folder / 'sample_{}.png'.format(ix))
-
-    plt.close(fig)
 
     return ix
 
