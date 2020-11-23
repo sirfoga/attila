@@ -20,7 +20,7 @@ def save_experiments(experiments, experiments_file):  # todo refactor (not here)
 
 def load_experiments(experiments_file):  # todo refactor (not here)
   with open(experiments_file, 'r') as fp:
-    experiments = ast.literal_eval(json.load(fp))
+    experiments = json.load(fp)
     experiments = [
       {
         k: np.array(v) if is_lst(v) else v
