@@ -1,20 +1,13 @@
-from pathlib import Path
 import numpy as np
 
-from attila.util.config import get_config
 from attila.util.plots import plot_preds, plot_history
 
-from attila.data.parse import parse_data, get_data
-from attila.data.experiments import load_experiments, save_experiments
-
 from attila.nn.models.unet import calc_out_size, build as build_model
-from attila.nn.metrics import mean_IoU, DSC
 from attila.nn.core import do_training, do_evaluation
+from attila.nn.metrics import mean_IoU, DSC
 
 from attila.data.prepare import train_validate_test_split, get_weights_file, get_model_output_folder, describe
 from attila.data.trans import crop_center_transformation, apply_transformations
-
-_here = Path('.').resolve()
 
 
 def get_default_args(config):
@@ -22,6 +15,7 @@ def get_default_args(config):
   pool_size = 2
 
   model_args = {
+    'img_depth': config.getint('image', 'depth'),
     'n_filters': config.getint('unet', 'n filters'),
     'n_layers': config.getint('unet', 'n layers'),
     'kernel_size': conv_kernel_size,
@@ -132,8 +126,8 @@ def do_experiments(experiments, data, config, out_path):  # todo refactor
   X_train, X_val, X_test, y_train, y_val, y_test = train_validate_test_split(
     X,
     y,
-    config.getfloat('experiment', 'val size'),
-    config.getfloat('experiment', 'test size')
+    config.getfloat('experiments', 'val size'),
+    config.getfloat('experiments', 'test size')
   )
 
   for i, experiment in enumerate(experiments):
@@ -150,31 +144,3 @@ def do_experiments(experiments, data, config, out_path):  # todo refactor
   plot_history(experiments, out_path / 'history.png', last=last_epochs)
 
   return experiments
-
-
-def main():
-  config = get_config(_here / './config.ini')
-
-  data_path = _here / config.get('data', 'folder')
-  data_path = data_path.resolve()
-
-  out_path = Path(config.get('experiments', 'output folder')).resolve()
-  out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
-
-  images_path = data_path / config.get('data', 'images')
-  masks_path = data_path / config.get('data', 'masks')
-  raw = get_data(images_path, masks_path)
-  X, y = parse_data(
-    raw,
-    (config.getint('image', 'width'), config.getint('image', 'height'))
-  )
-
-  experiments_file = _here / config.get('experiments', 'output file')
-  experiments = load_experiments(experiments_file)
-  do_experiments(experiments, (X, y), config, out_path)
-
-  save_experiments(experiments, out_path / config.get('experiments', 'output file'))
-
-
-if __name__ == '__main__':
-  main()
