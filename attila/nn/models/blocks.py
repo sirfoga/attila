@@ -21,7 +21,7 @@ def conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout=0.0, ba
 
         return x
 
-  return _f
+    return _f
 
 
 def se_block(r=16.0):
@@ -34,18 +34,18 @@ def se_block(r=16.0):
 
         return _f
 
-  def excite(x, n_channels, r):
-      # todo why ? se = Reshape(se_shape)(se)
-      x = fc(n_channels // r, 'relu')(x)
-      x = fc(n_channels, 'sigmoid')(x)
-      return x
+    def excite(x, n_channels, r):
+        # todo why ? se = Reshape(se_shape)(se)
+        x = fc(n_channels // r, 'relu')(x)
+        x = fc(n_channels, 'sigmoid')(x)
+        return x
 
-  def _f(x):
-      n_channels = x.shape[-1]
+    def _f(x):
+        n_channels = x.shape[-1]
 
-      inp = x  # save for later
-      x = squeeze(x)
-      x = excite(x, n_channels, r)
-      return multiply([inp, x])
+        inp = x  # save for later
+        x = squeeze(x)
+        x = excite(x, n_channels, r)
+        return multiply([inp, x])
 
-  return _f
+    return _f
