@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 def get_figsize(n_rows, n_cols):
     row_size = 4    # heigth
-    column_size = 5    # width
+    column_size = 10    # width
 
     return (n_cols * column_size, n_rows * row_size)
 
@@ -48,33 +48,36 @@ def plot_history(experiments, out_path, last=None):
     n_rows = int(np.ceil(len(experiments) / n_cols))
     fig, ax = get_figa(n_rows, n_cols)
 
-    def _plot_key_results(ax, key, results, color, find_min=False, find_max=False):
-            training = results[key]
-            validation = results['val_{}'.format(key)]
+    def _plot_key(ax, key, results, color, scale=None, find_min=False, find_max=False):
+        training = results[key]
+        validation = results['val_{}'.format(key)]
 
-            ax.plot(training, label='training {}'.format(key), color=color)
-            ax.plot(validation, '--', label='validation {}'.format(key), color=color)
+        if scale:
+            ax.set_ylim(scale)
 
-            if find_min:
-                ax.plot(np.argmin(validation), np.min(validation), marker='x', color='r')
+        ax.plot(training, label='training {}'.format(key), color=color)
+        ax.plot(validation, '--', label='validation {}'.format(key), color=color)
 
-            if find_max:
-                ax.plot(np.argmax(validation), np.max(validation), marker='x', color='r')
+        if find_min:
+            ax.plot(np.argmin(validation), np.min(validation), marker='x', color='r')
+
+        if find_max:
+            ax.plot(np.argmax(validation), np.max(validation), marker='x', color='r')
 
     def _plot_results(results, ax, title):
-            _plot_key_results(ax, 'loss', results, 'C1', find_min=True)    # see https://matplotlib.org/3.1.1/users/dflt_style_changes.html
-            ax.set_ylabel('log loss', color='C3')
-            ax.legend()
+        _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.05], find_min=True)
+        ax.set_ylabel('log loss', color='C3')
+        ax.legend()
 
-            ax = ax.twinx()    # instantiate a second axes that shares the same x-axis
+        ax = ax.twinx()    # instantiate a second axes that shares the same x-axis
 
-            _plot_key_results(ax, 'mean_IoU', results, 'C0', find_max=True)
-            _plot_key_results(ax, 'DSC', results, 'C2', find_max=True)
+        _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.9, 1], find_max=True)
+        _plot_key(ax, 'DSC', results, 'C2', scale=[0.9, 1], find_max=True)
 
-            ax.set_ylabel('metrics', color='b')
-            ax.legend()
+        ax.set_ylabel('metrics', color='b')
+        ax.legend()
 
-            ax.set_title(title)
+        ax.set_title(title)
 
     for a, experiment in zip(ax.ravel(), experiments):
         history = experiment['history']
@@ -86,7 +89,6 @@ def plot_history(experiments, out_path, last=None):
         _plot_results(results, a, experiment['name'])
 
     fig.savefig(out_path)
-    plt.close(fig)
 
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
