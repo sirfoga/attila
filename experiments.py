@@ -14,8 +14,8 @@ def main():
   data_path = _here / config.get('data', 'folder')
   data_path = data_path.resolve()
 
-  out_path = Path(config.get('experiments', 'output folder')).resolve()
-  out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
+  out_folder = Path(config.get('experiments', 'output folder')).resolve()
+  out_folder.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
 
   images_path = data_path / config.get('data', 'images')
   masks_path = data_path / config.get('data', 'masks')
@@ -27,9 +27,9 @@ def main():
 
   experiments_file = _here / config.get('experiments', 'output file')
   experiments = load_experiments(experiments_file)
-  do_experiments(experiments, (X, y), config, out_path)
+  do_experiments(experiments, (X, y), config, out_folder)
 
-  save_experiments(experiments, out_path / config.get('experiments', 'output file'))
+  save_experiments(experiments, out_folder / config.get('experiments', 'output file'))
 
 
 if __name__ == '__main__':

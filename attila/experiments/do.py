@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 from attila.util.plots import plot_preds, plot_history
 
@@ -8,6 +9,8 @@ from attila.nn.metrics import mean_IoU, DSC
 
 from attila.data.prepare import train_validate_test_split, get_weights_file, get_model_output_folder, describe
 from attila.data.trans import crop_center_transformation, apply_transformations
+
+from attila.util.config import is_verbose
 
 
 def get_default_args(config):
@@ -51,7 +54,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, config, out_path):    # todo refactor
+def do_experiment(experiment, data, config, out_folder):
     def _fix_data_shape(img_out_shape):
         def _f(x):
             output_shape = (*img_out_shape, config.getint('image', 'depth'))
@@ -87,11 +90,11 @@ def do_experiment(experiment, data, config, out_path):    # todo refactor
 
     (X_train, X_val, X_test, y_train, y_val, y_test) = _prepare_data(data)
 
-    if config.getint('experiments', 'verbose'):
+    if is_verbose('experiments', config):
         describe(X_train, X_val, X_test, y_train, y_val, y_test)
 
     model, compile_args = get_model(experiment, config)
-    weights_file = str(get_weights_file(out_path, experiment['name']))
+    weights_file = str(get_weights_file(out_folder, experiment['name']))
 
     results = do_training(
         model,
@@ -103,7 +106,7 @@ def do_experiment(experiment, data, config, out_path):    # todo refactor
         config.getint('training', 'batch size'),
         config.getint('training', 'epochs'),
         compile_args,
-        config.getint('experiments', 'verbose')
+        is_verbose('experiments', config)
     )
 
     stats, preds = do_evaluation(
@@ -112,7 +115,7 @@ def do_experiment(experiment, data, config, out_path):    # todo refactor
         X_test,
         y_test,
         config.getint('training', 'batch size'),
-        config.getint('experiments', 'verbose')
+        is_verbose('experiments', config)
     )
 
     plot_preds(
@@ -121,35 +124,51 @@ def do_experiment(experiment, data, config, out_path):    # todo refactor
         preds,
         cmap=config.get('image', 'cmap'),
         title='model: {}'.format(experiment['name']),
-        out_folder=get_model_output_folder(out_path, experiment['name'])
+        out_folder=get_model_output_folder(out_folder, experiment['name'])
     )
 
     return results, stats
 
 
-def do_experiments(experiments, data, config, out_path):    # todo refactor
-    if config.getint('experiments', 'verbose'):
+def do_experiments(experiments, data, config, out_folder):
+    if is_verbose('experiments', config):
         print('ready to perform {} experiments'.format(len(experiments)))
 
-    X, y = data    # unpack
-    X_train, X_val, X_test, y_train, y_val, y_test = train_validate_test_split(
-        X,
-        y,
-        config.getfloat('experiments', 'val size'),
-        config.getfloat('experiments', 'test size')
-    )
-
     for i, experiment in enumerate(experiments):
-        if config.getint('experiments', 'verbose'):
+        if is_verbose('experiments', config):
             print('=== experiment # {} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
 
-        data = (X_train, X_val, X_test, y_train, y_val, y_test)
-        results, eval_stats = do_experiment(experiment, data, config, out_path)
-
+        results, eval_stats = do_experiment(experiment, data, config, out_folder)
         experiments[i]['history'] = results.history
         experiments[i]['eval'] = eval_stats
 
     last_epochs = int(config.getint('training', 'epochs') * 0.8)
-    plot_history(experiments, last=last_epochs, out_folder=out_path)
+    plot_history(experiments, last=last_epochs, out_folder=out_folder)
 
     return experiments
+
+
+def do_batch_experiments(experiments, data, config, out_folder):
+    nruns = config.getint('experiments', 'nruns')
+    X, y = data  # unpack
+    X_train_val, X_test, y_train_val, y_test = train_test_split(
+        X, y, test_size=config.getfloat('experiments', 'test size')
+    )
+    val_size = config.getfloat('experiments', 'val size') / (1 - config.getfloat('experiments', 'test size'))
+
+    for nrun in range(nruns):
+        if is_verbose('experiments', config):
+            print('ready to perform #{} / {} batch of experiments'.format(nrun + 1, nruns))
+
+        X_train, X_val, y_train, y_val = train_test_split(
+            X_train_val, y_train_val, test_size=val_size
+        )  # different experiment different random seed
+
+        # todo data augmentation
+        data = (X_train, X_val, X_test, y_train, y_val, y_test)
+        do_experiments(
+            experiments,
+            data,
+            config,
+            out_folder / 'run-{}'.format(nrun)
+        )
