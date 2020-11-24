@@ -1,4 +1,3 @@
-import numpy as np
 from sklearn.model_selection import train_test_split
 
 from attila.util.plots import plot_preds, plot_history
@@ -7,8 +6,9 @@ from attila.nn.models.unet import calc_out_size, build as build_model
 from attila.nn.core import do_training, do_evaluation
 from attila.nn.metrics import mean_IoU, DSC
 
-from attila.data.prepare import train_validate_test_split, get_weights_file, get_model_output_folder, describe
-from attila.data.trans import crop_center_transformation, apply_transformations
+from attila.data.prepare import get_weights_file, get_model_output_folder, describe
+from attila.data.transform import crop_center_transformation, do_transformations
+from attila.data.augment import do_augmentations, flip, flop
 
 from attila.util.config import is_verbose
 
@@ -58,13 +58,12 @@ def do_experiment(experiment, data, config, out_folder):
     def _fix_data_shape(img_out_shape):
         def _f(x):
             output_shape = (*img_out_shape, config.getint('image', 'depth'))
-
-            transformations = [
-                crop_center_transformation(output_shape),
-            ]
-            x = apply_transformations(x, transformations)    # reduce output size
-            x = np.array(x)
-            return x
+            return do_transformations(
+                x,
+                [
+                    crop_center_transformation(output_shape),
+                ]
+            )
 
         return _f
 
@@ -136,7 +135,7 @@ def do_experiments(experiments, data, config, out_folder):
 
     for i, experiment in enumerate(experiments):
         if is_verbose('experiments', config):
-            print('=== experiment # {} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
+            print('=== experiment #{} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
 
         results, eval_stats = do_experiment(experiment, data, config, out_folder)
         experiments[i]['history'] = results.history
@@ -164,7 +163,16 @@ def do_batch_experiments(experiments, data, config, out_folder):
             X_train_val, y_train_val, test_size=val_size
         )  # different experiment different random seed
 
-        # todo data augmentation
+        if config.getboolean('data', 'aug'):
+            X_train, y_train = do_augmentations(
+                X_train,
+                y_train,
+                [
+                    flip,
+                    flop
+                ]
+            )
+
         data = (X_train, X_val, X_test, y_train, y_val, y_test)
         do_experiments(
             experiments,

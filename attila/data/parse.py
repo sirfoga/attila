@@ -18,9 +18,9 @@ def load_mask(f):
 
 def get_data(imgs_path, masks_path, extension='.tif'):
     list_imgs = [
-            f
-            for f in imgs_path.iterdir()
-            if str(f).endswith(extension)
+        f
+        for f in imgs_path.iterdir()
+        if str(f).endswith(extension)
     ]
 
     images = []
