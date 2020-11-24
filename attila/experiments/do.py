@@ -23,7 +23,7 @@ def get_default_args(config):
         'n_layers': config.getint('unet', 'n layers'),
         'kernel_size': conv_kernel_size,
         'pool_size': pool_size,
-        'n_classes': 1,    # the other is 1 - ... (because it's a probability distribution)
+        'n_classes': 1,  # the other is 1 - ... (because it's a probability distribution)
         'final_activation': config.get('unet', 'final activation'),
         'dropout': config.getfloat('unet', 'dropout'),
         'batchnorm': config.getboolean('unet', 'batchnorm')
@@ -69,9 +69,9 @@ def do_experiment(experiment, data, config, out_folder):
 
 
     def _prepare_data(data):
-        (X_train, X_val, X_test, y_train, y_val, y_test) = data    # unpack
+        (X_train, X_val, X_test, y_train, y_val, y_test) = data  # unpack
 
-        img_shape = y_train.shape[1: 2 + 1]    # width, height of input images
+        img_shape = y_train.shape[1: 2 + 1]  # width, height of input images
         img_out_shape = calc_out_size(
             config.getint('unet', 'n layers'),
             2,

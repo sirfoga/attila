@@ -1,7 +1,7 @@
 from tifffile import imread
 import numpy as np
 
-from attila.data.trans import rm_percentiles_transformation, normalize_transformation, crop_center_transformation, add_dim, apply_transformations
+from attila.data.transform import rm_percentiles_transformation, normalize_transformation, crop_center_transformation, add_dim, do_transformations
 
 
 def load_tiff(f):
@@ -39,14 +39,12 @@ def get_data(imgs_path, masks_path, extension='.tif'):
 
 
 def parse_data(raw, img_shape):
-    X, y = raw
+    (X, y) = raw
     transformations = [
-        np.array,    # just in case parser did not np.array-ed
-        rm_percentiles_transformation(2, 98),    # threshold outliers
-        normalize_transformation((0, 1)),    # pixel values in [0, 1]
+        np.array,  # just in case parser did not np.array-ed
+        rm_percentiles_transformation(2, 98),  # threshold outliers
+        normalize_transformation((0, 1)),  # pixel values in [0, 1]
         crop_center_transformation(img_shape),
         add_dim()
     ]
-    X, y = apply_transformations(X, transformations), apply_transformations(y, transformations)
-    X, y = np.array(X), np.array(y)    # python list -> np.array
-    return X, y
+    return do_transformations(X, y, transformations)

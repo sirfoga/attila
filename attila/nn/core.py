@@ -19,7 +19,7 @@ def describe_model(model):
 
 
 def do_training(model, X_train, X_val, y_train, y_val, model_file, batch_size, n_epochs, compile_args, verbose):
-    callbacks = [    # todo as arg
+    callbacks = [  # todo as arg
         EarlyStopping(patience=10, verbose=verbose),
         ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
         ModelCheckpoint(model_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
@@ -36,7 +36,7 @@ def do_training(model, X_train, X_val, y_train, y_val, model_file, batch_size, n
         epochs=n_epochs,
         callbacks=callbacks,
         validation_data=(X_val, y_val)
-    )    # history
+    )  # history
 
 
 def do_inference(model, weights_file, X, batch_size, verbose):
@@ -45,7 +45,7 @@ def do_inference(model, weights_file, X, batch_size, verbose):
 
 
 def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
-    metrics = [    # todo as arg
+    metrics = [  # todo as arg
         {
             'name': 'mean IoU',
             'callback': mean_IoU

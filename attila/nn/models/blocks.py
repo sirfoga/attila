@@ -35,7 +35,7 @@ def se_block(r=16.0):
         return _f
 
     def excite(x, n_channels, r):
-        # todo why ? se = Reshape(se_shape)(se)
+      # todo why ? se = Reshape(se_shape)(se)
         x = fc(n_channels // r, 'relu')(x)
         x = fc(n_channels, 'sigmoid')(x)
         return x

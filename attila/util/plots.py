@@ -4,8 +4,8 @@ from matplotlib import pyplot as plt
 
 
 def get_figsize(n_rows, n_cols):
-    row_size = 4    # heigth
-    column_size = 10    # width
+    row_size = 4  # heigth
+    column_size = 10  # width
 
     return (n_cols * column_size, n_rows * row_size)
 
@@ -64,14 +64,14 @@ def plot_history(experiments, last=None, out_folder=None):
 
     def _plot_results(results, ax, title):
         _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.05], find_min=True)
-        # ax.legend()
+      # ax.legend()
 
-        ax = ax.twinx()    # instantiate a second axes that shares the same x-axis
+        ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
         _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.9, 1], find_max=True)
         _plot_key(ax, 'DSC', results, 'C2', scale=[0.9, 1], find_max=True)
 
-        # ax.legend()
+      # ax.legend()
 
         ax.set_title(title)
 
