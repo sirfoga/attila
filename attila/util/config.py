@@ -7,5 +7,5 @@ def get_config(file_path):
     return config
 
 
-def is_verbose(config, key):
+def is_verbose(key, config):
     return config.getint(key, 'verbose')

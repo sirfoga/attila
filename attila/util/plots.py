@@ -19,21 +19,39 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     if ix is None:
         ix = random.randint(0, len(X) - 1)
 
-    fig, ax = get_figa(1, 3)
+    fig, ax = get_figa(1, 2)
 
-    im = ax[0].imshow(X[ix, ..., 0], cmap=cmap)
+    img = X[ix, ...].squeeze()
+
+    im = ax[0].imshow(img, cmap=cmap)
     fig.colorbar(im, ax=ax[0])
-    ax[0].set_title('image')
+    ax[0].set_title('input image')
 
-    ax[1].hist(X[ix, ...].ravel(), bins=256)
+    ax[1].hist(img.ravel(), bins=256)
     ax[1].set_title('histogram of image')
 
-    ax[2].imshow(y[ix].squeeze(), cmap='gray')
-    ax[2].set_title('mask')
-
-    fig.suptitle('sample #{}'.format(ix))
     if out_folder:
-        fig.savefig(out_folder / 'sample_{}.png'.format(ix))
+        fig.savefig(out_folder / 'sample_input_{}.png'.format(ix))
+        plt.close()
+
+    fig, ax = get_figa(1, 3)
+
+    mask_background = y[ix, ..., 0]
+    mask_foreground = y[ix, ..., 1]
+    mask_borders = y[ix, ..., 2]
+
+    ax[0].imshow(mask_background, cmap='gray')
+    ax[0].set_title('mask 1st channel: background')
+
+    ax[1].imshow(mask_foreground, cmap='gray')
+    ax[1].set_title('mask 2nd channel: foreground')
+
+    ax[2].imshow(mask_borders, cmap='gray')
+    ax[2].set_title('mask 3rd channel: borders')
+
+    if out_folder:
+        fig.savefig(out_folder / 'sample_mask_{}.png'.format(ix))
+        plt.close()
 
     return ix
 
@@ -86,6 +104,7 @@ def plot_history(experiments, last=None, out_folder=None):
 
     if out_folder:
         fig.savefig(out_folder / 'history.png')
+        plt.close()
 
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):

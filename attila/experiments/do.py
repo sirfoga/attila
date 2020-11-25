@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 
-from attila.util.plots import plot_preds, plot_history
+from attila.util.plots import plot_preds, plot_history, plot_sample
 
 from attila.nn.models.unet import calc_out_size, build as build_model
 from attila.nn.core import do_training, do_evaluation
@@ -12,18 +12,19 @@ from attila.data.augment import do_augmentations, flip, flop
 
 from attila.util.config import is_verbose
 
+from attila.experiments.data import save_experiments
+
 
 def get_default_args(config):
     conv_kernel_size = 3
     pool_size = 2
 
     model_args = {
-        'img_depth': config.getint('image', 'depth'),
         'n_filters': config.getint('unet', 'n filters'),
         'n_layers': config.getint('unet', 'n layers'),
         'kernel_size': conv_kernel_size,
         'pool_size': pool_size,
-        'n_classes': 1,  # the other is 1 - ... (because it's a probability distribution)
+        'n_classes': config.getint('image', 'n classes'),
         'final_activation': config.get('unet', 'final activation'),
         'dropout': config.getfloat('unet', 'dropout'),
         'batchnorm': config.getboolean('unet', 'batchnorm')
@@ -55,9 +56,9 @@ def get_model(experiment, config):
 
 
 def do_experiment(experiment, data, config, out_folder):
-    def _fix_data_shape(img_out_shape):
+    def _crop_data(img_out_shape):
         def _f(x):
-            output_shape = (*img_out_shape, config.getint('image', 'depth'))
+            output_shape = (*img_out_shape, config.getint('image', 'n classes'))
             return do_transformations(
                 x,
                 [
@@ -74,15 +75,15 @@ def do_experiment(experiment, data, config, out_folder):
         img_shape = y_train.shape[1: 2 + 1]  # width, height of input images
         img_out_shape = calc_out_size(
             config.getint('unet', 'n layers'),
-            2,
-            3,
-            2,
+            config.getint('unet', 'n conv layers'),
+            config.getint('unet', 'conv size'),
+            config.getint('unet', 'pool size'),
             experiment['padding']
         )(img_shape)
 
-        y_train = _fix_data_shape(img_out_shape)(y_train)
-        y_val = _fix_data_shape(img_out_shape)(y_val)
-        y_test = _fix_data_shape(img_out_shape)(y_test)
+        y_train = _crop_data(img_out_shape)(y_train)
+        y_val = _crop_data(img_out_shape)(y_val)
+        y_test = _crop_data(img_out_shape)(y_test)
 
         return (X_train, X_val, X_test, y_train, y_val, y_test)
 
@@ -149,13 +150,19 @@ def do_experiments(experiments, data, config, out_folder):
 
 def do_batch_experiments(experiments, data, config, out_folder):
     nruns = config.getint('experiments', 'nruns')
-    X, y = data  # unpack
+    (X, y) = data  # unpack
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X, y, test_size=config.getfloat('experiments', 'test size')
     )
+    if is_verbose('experiments', config):
+        print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
+
     val_size = config.getfloat('experiments', 'val size') / (1 - config.getfloat('experiments', 'test size'))
 
     for nrun in range(nruns):
+        folder = out_folder / 'run-{}'.format(nrun)
+        folder.mkdir(parents=True, exist_ok=True)
+
         if is_verbose('experiments', config):
             print('ready to perform #{} / {} batch of experiments'.format(nrun + 1, nruns))
 
@@ -168,15 +175,26 @@ def do_batch_experiments(experiments, data, config, out_folder):
                 X_train,
                 y_train,
                 [
-                    flip,
-                    flop
+                    flip(),
+                    flop()
                 ]
             )
 
+            if is_verbose('experiments', config):
+                print('augmented training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
+
+        # save sample for later processing
+        plot_sample(X_train, y_train, out_folder=folder)
+
         data = (X_train, X_val, X_test, y_train, y_val, y_test)
-        do_experiments(
+        results = do_experiments(
             experiments,
             data,
             config,
-            out_folder / 'run-{}'.format(nrun)
+            folder
         )
+        out_f = folder / config.get('experiments', 'output file')
+        save_experiments(results, out_f)
+
+        if is_verbose('experiments', config):
+            print('done! output folder is {}'.format(folder))

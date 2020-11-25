@@ -129,7 +129,7 @@ def final_path(n_classes, activation, padding, use_se_block):
             x = se_block()(x)
 
         x = Conv2D(n_classes, (1, 1), padding=padding, activation=activation)(x)
-        return x
+        return x  # todo softmax ?
 
     return _f
 

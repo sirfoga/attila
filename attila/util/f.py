@@ -5,6 +5,7 @@ def compose_f(funcs):
     def _f(x):
         for f in funcs:
             x = f(x)
+
         return x
 
     return _f
