@@ -2,7 +2,7 @@ import numpy as np
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
-from attila.nn.metrics import mean_IoU, DSC
+from attila.nn.metrics import mean_IoU, mean_DSC
 
 
 def describe_model(model):
@@ -45,14 +45,14 @@ def do_inference(model, weights_file, X, batch_size, verbose):
 
 
 def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
-    metrics = [  # todo as arg
+    metrics = [
         {
             'name': 'mean IoU',
             'callback': mean_IoU
         },
         {
             'name': 'DSC',
-            'callback': lambda y_true, y_pred: DSC(K.constant(y_true), K.constant(y_pred), axis=[1, 2])
+            'callback': mean_DSC
         }
     ]
 
@@ -72,7 +72,10 @@ def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
     for ix in range(len(X_test)):
         for metric in metrics:
             metric_f = metric['callback']
-            metric_val = metric_f(y_test[ix], preds[ix]).numpy()
+            metric_val = metric_f(
+                K.cast(y_test[ix, ...], dtype='float32'),
+                K.cast(preds[ix, ...], dtype='float32')
+            ).numpy()
             stats[metric['name']].append(metric_val)
 
     if verbose:
