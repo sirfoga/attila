@@ -43,11 +43,11 @@ def calc_out_size(n_layers, conv_layers, conv_size, pool_size, padding):
     return _f
 
 
-def contracting_block(n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm):
+def contracting_block(n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers):
     pooling = MaxPooling2D(pool_shape)
 
     def _f(x):
-        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm)(x)
+        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm, inner_layers=conv_inner_layers)(x)
         skip_conn = x  # save for expanding path
         x = pooling(x)  # ready for next block
         return x, skip_conn
@@ -74,18 +74,18 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
     return _f
 
 
-def middle_path(kernel_shape, padding, dropout, batchnorm):
+def middle_block(kernel_shape, padding, dropout, batchnorm, conv_inner_layers):
     use_se_block = False
 
     def _f(x):
         n_filters = int(x.shape[-1] * filter_mult)
-        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm)(x)
+        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm, inner_layers=conv_inner_layers)(x)
         return x
 
     return _f
 
 
-def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm):
+def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers):
     upsampling = UpSampling2D(pool_shape)
 
     def _f(x):
@@ -98,7 +98,7 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
         if using_skip_conn:
             x = concatenate([x, skip_conn])
 
-        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm)(x)
+        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm, inner_layers=conv_inner_layers)(x)
         return x
 
     return _f
@@ -129,18 +129,18 @@ def final_path(n_classes, activation, padding, use_se_block):
             x = se_block()(x)
 
         x = Conv2D(n_classes, (1, 1), padding=padding, activation=activation)(x)
-        return x  # todo softmax ?
+        return x
 
     return _f
 
 
-def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_activation, padding, use_skip_conn, use_se_block, dropout, batchnorm):
+def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_activation, padding, use_skip_conn, use_se_block, dropout, batchnorm, conv_inner_layers):
     def _f(x):
-        x, skip_conns = contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_conn, padding, use_se_block, dropout, batchnorm)(x)
-        x = middle_path(kernel_shape, padding, dropout, batchnorm)(x)
+        x, skip_conns = contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_conn, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
+        x = middle_block(kernel_shape, padding, dropout, batchnorm, conv_inner_layers)(x)
 
         current_n_filters = skip_conns[-1].shape[-1] if use_skip_conn else n_filters * filter_mult ** (n_layers - 1)
-        x = expanding_path(current_n_filters, skip_conns, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm)(x)
+        x = expanding_path(current_n_filters, skip_conns, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
         x = final_path(n_classes, final_activation, padding, use_se_block)(x)
         return x
 

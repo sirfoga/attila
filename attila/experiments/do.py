@@ -27,7 +27,8 @@ def get_default_args(config):
         'n_classes': config.getint('image', 'n classes'),
         'final_activation': config.get('unet', 'final activation'),
         'dropout': config.getfloat('unet', 'dropout'),
-        'batchnorm': config.getboolean('unet', 'batchnorm')
+        'batchnorm': config.getboolean('unet', 'batchnorm'),
+        'conv_inner_layers': config.getint('image', 'n conv inner layers'),
     }
 
     compile_args = {
@@ -107,7 +108,7 @@ def do_experiment(experiment, data, config, out_folder):
         config.getint('training', 'epochs'),
         compile_args,
         is_verbose('experiments', config)
-    ) 
+    )
 
     stats, preds = do_evaluation(
         model,
@@ -182,7 +183,7 @@ def do_batch_experiments(experiments, data, config, out_folder):
 
             if is_verbose('experiments', config):
                 print('augmented training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
-	    
+
         # save sample for later processing
         plot_sample(X_train, y_train, out_folder=folder)
 

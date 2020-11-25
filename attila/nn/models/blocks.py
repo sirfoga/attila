@@ -1,7 +1,7 @@
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Dropout, multiply, Dense, GlobalAveragePooling2D
 
 
-def conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout=0.0, batchnorm=True, inner_layers=2):  # todo inner_layers as arg
+def conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout=0.0, batchnorm=True, inner_layers=1):
     activation = 'relu'
 
     def _f(x):
@@ -35,7 +35,6 @@ def se_block(r=16.0):
         return _f
 
     def excite(x, n_channels, r):
-      # todo why ? se = Reshape(se_shape)(se)
         x = fc(n_channels // r, 'relu')(x)
         x = fc(n_channels, 'sigmoid')(x)
         return x
