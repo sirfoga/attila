@@ -56,7 +56,7 @@ def mean_IoU(y_true, y_pred):
     - y_pred is a 3D array. Each channel represents the predicted BINARY channel
     """
 
-    scores = metric_per_channel(y_true, y_pred, mean_IoU)
+    scores = metric_per_channel(y_true, y_pred, iou)
     return np.mean(scores)
 
 
@@ -78,13 +78,14 @@ def mean_DSC(y_true, y_pred, smooth=1.0):
 
 def batch_metric(metric):
     def _f(y_true, y_pred):
-        scores = []
-        batch_size = true.shape[0]
-        
-        for batch in range(batch_size):
-            # metric(
-            print(y_true[batch:].shape, y_pred[batch:].shape)
-
-        return 1
+        batch_size = 
+        scores = [
+            metric(
+                y_true[batch, ...],
+                y_pred[batch, ...]
+            )
+            for batch in range(batch_size)
+        ]
+        return np.mean(scores)
 
     return _f
