@@ -49,11 +49,14 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     ax[0].imshow(background, cmap='gray')
     ax[0].set_title('mask 1st channel: background')
 
-    ax[1].imshow(foreground, cmap='gray')
+    # ax[1].imshow(foreground, cmap='gray')
+    ax[1].contour(foreground, colors='red', levels=[0.5])
     ax[1].set_title('mask 2nd channel: foreground')
 
-    ax[2].imshow(borders, cmap='gray')
+    # ax[2].imshow(borders, cmap='gray')
+    ax[2].contour(foreground, colors='red', levels=[0.5])
     ax[2].set_title('mask 3rd channel: borders')
+
 
     if out_folder:
         fig.savefig(out_folder / 'sample_mask_{}.png'.format(ix))
@@ -120,19 +123,20 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
     for _ in range(how_many):
         ix = random.randint(0, len(X) - 1)
 
-        fig, ax = get_figa(1, 3)
+        fig, ax = get_figa(1, 2)
 
         ax[0].imshow(X[ix, ..., 0], cmap=cmap)
         ax[0].set_title('input image (sample #{})'.format(ix))
 
-        ground_truth_background, ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
-        pred_background, pred_foreground, pred_borders = get_mask(preds, ix)
+        _, ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
+        ground_truth = ground_truth_foreground + ground_truth_borders
 
-        ax[1].imshow(pred_foreground, cmap='gray')
-        ax[1].set_title('pred foreground')
-        
-        ax[2].imshow(ground_truth_foreground, cmap='gray')
-        ax[2].set_title('ground truth foreground')
+        _, pred_foreground, pred_borders = get_mask(preds, ix)
+        pred = pred_foreground + pred_borders
+
+        ax[1].contour(ground_truth, colors='red', levels=[0.5])
+        ax[1].contour(pred, colors='blue', levels=[0.5])
+        ax[1].set_title('ground truth (red) VS prediction (blue) contours')
 
         if title:
             fig.suptitle(title)
