@@ -78,17 +78,13 @@ def mean_DSC(y_true, y_pred, smooth=1.0):
 
 def batch_metric(metric):
     def _f(y_true, y_pred):
-        true = y_true
-        pred = y_pred
-
+        scores = []
         batch_size = true.shape[0]
-        scores = [
-            metric(
-                true[batch, ...],
-                pred[batch, ...]
-            )
-            for batch in range(batch_size)
-        ]
-        return np.mean(scores)
+        
+        for batch in range(batch_size):
+            # metric(
+            print(y_true[batch:].shape, y_pred[batch:].shape)
+
+        return 1
 
     return _f
