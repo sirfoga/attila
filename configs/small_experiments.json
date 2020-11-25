@@ -1,1 +1,1 @@
-"[{'use_skip_conn': True, 'padding': 'valid', 'use_se_block': True, 'name': 'wow'}]"
+"[{'use_skip_conn': True, 'padding': 'valid', 'use_se_block': True, 'name': 'wow'}, {'use_skip_conn': False, 'padding': 'same', 'use_se_block': False, 'name': 'wow_1'}]"
