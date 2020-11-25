@@ -147,12 +147,16 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
     return _f
 
 
-def build(img_depth, n_filters, n_layers, kernel_size, pool_size, n_classes, final_activation, padding='same', use_skip_conn=True, use_se_block=False, dropout=0.0, batchnorm=False):
+def build(n_filters, n_layers, kernel_size, pool_size, n_classes, final_activation, padding='same', use_skip_conn=True, use_se_block=False, dropout=0.0, batchnorm=False):
     n_dim = 2  # todo as arg
     kernel_shape = (kernel_size, ) * n_dim
     pool_shape = (pool_size, ) * n_dim
 
-    inp = Input((None, None, img_depth))
+    # input channels (1): grayscale
+    # output channels (3): background, foreground, borders
+
+    n_channels = 1
+    inp = Input((None, None, n_channels))
     out = unet_block(
         n_filters,
         n_layers,
