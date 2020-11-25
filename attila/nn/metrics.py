@@ -78,7 +78,7 @@ def mean_DSC(y_true, y_pred, smooth=1.0):
 
 def batch_metric(metric):
     def _f(y_true, y_pred):
-        batch_size = 
+        batch_size = y_true.shape[0]
         scores = [
             metric(
                 y_true[batch, ...],
