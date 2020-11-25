@@ -133,4 +133,4 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
             fig.suptitle(title)
 
         if out_folder:
-            fig.savefig(out_folder / '{}.pgf'.format(ix))
+            fig.savefig(out_folder / '{}.png'.format(ix))
