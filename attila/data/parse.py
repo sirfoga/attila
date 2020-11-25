@@ -40,12 +40,12 @@ def get_data(imgs_path, masks_path, extension='.tif'):
 
 def parse_data(raw, img_shape):
     (X, y) = raw
-    
+
     base_transformations = [
         np.array,  # just in case parser did not np.array-ed
+        crop_center_transformation(img_shape),
         rm_percentiles_transformation(2, 98),  # threshold outliers
         normalize_transformation((0, 1)),  # pixel values in [0, 1]
-        crop_center_transformation(img_shape)
     ]
 
     X = do_transformations(

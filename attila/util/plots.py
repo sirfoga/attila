@@ -87,13 +87,13 @@ def plot_history(experiments, last=None, out_folder=None):
             ax.plot(np.argmax(validation), np.max(validation), marker='x', color='r')
 
     def _plot_results(results, ax, title):
-        _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.05], find_min=True)
+        _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.02], find_min=True)
         # ax.legend() 
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
-        _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.9, 1], find_max=True)
-        _plot_key(ax, 'DSC', results, 'C2', scale=[0.9, 1], find_max=True)
+        _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.95, 1], find_max=True)
+        _plot_key(ax, 'DSC', results, 'C2', scale=[0.95, 1], find_max=True)
 
         # ax.legend()
 
@@ -114,7 +114,12 @@ def plot_history(experiments, last=None, out_folder=None):
 
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
-    for ix in range(len(preds)):
+    pred_count = preds.shape[0]
+    how_many = np.min(pred_count, 8)
+
+    for _ in range(how_many):
+        ix = random.randint(0, len(X) - 1)
+
         fig, ax = get_figa(1, 3)
 
         ax[0].imshow(X[ix, ..., 0], cmap=cmap)
@@ -134,3 +139,4 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
 
         if out_folder:
             fig.savefig(out_folder / '{}.png'.format(ix))
+            plt.close()
