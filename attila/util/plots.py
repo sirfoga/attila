@@ -50,11 +50,11 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     ax[0].set_title('mask 1st channel: background')
 
     # ax[1].imshow(foreground, cmap='gray')
-    ax[1].contour(foreground, colors='red', levels=[0.5])
+    ax[1].contour(foreground + borders, colors='red', levels=[0.5])
     ax[1].set_title('mask 2nd channel: foreground')
 
     # ax[2].imshow(borders, cmap='gray')
-    ax[2].contour(foreground, colors='red', levels=[0.5])
+    ax[2].contour(foreground + borders, colors='blue', levels=[0.5])
     ax[2].set_title('mask 3rd channel: borders')
 
 
