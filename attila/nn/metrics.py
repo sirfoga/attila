@@ -57,7 +57,8 @@ def mean_IoU(y_true, y_pred):
     """
 
     scores = metric_per_channel(y_true, y_pred, iou)
-    return np.mean(scores)
+    scores = K.cast(scores, dtype='float32')
+    return K.mean(scores)
 
 
 def DSC(y_true, y_pred, smooth=1.0):
@@ -79,6 +80,9 @@ def mean_DSC(y_true, y_pred, smooth=1.0):
 def batch_metric(metric):
     def _f(y_true, y_pred):
         batch_size = y_true.shape[0]
+        if batch_size is None:
+            batch_size = 1
+
         scores = [
             metric(
                 y_true[batch, ...],
@@ -86,6 +90,7 @@ def batch_metric(metric):
             )
             for batch in range(batch_size)
         ]
-        return np.mean(scores)
+        scores = K.cast(scores, dtype='float32')
+        return K.mean(scores)
 
     return _f
