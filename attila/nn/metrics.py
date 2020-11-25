@@ -74,7 +74,8 @@ def DSC(y_true, y_pred, smooth=1.0):
 
 def mean_DSC(y_true, y_pred, smooth=1.0):
     scores = metric_per_channel(y_true, y_pred, DSC)
-    return np.mean(scores)
+    scores = K.cast(scores, dtype='float32')
+    return K.mean(scores)
 
 
 def batch_metric(metric):
@@ -92,5 +93,6 @@ def batch_metric(metric):
         ]
         scores = K.cast(scores, dtype='float32')
         return K.mean(scores)
-
+    
+    _f.__name__ = 'batch_metric-{}'.format(metric.__name__)
     return _f

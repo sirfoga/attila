@@ -115,7 +115,7 @@ def plot_history(experiments, last=None, out_folder=None):
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
     pred_count = preds.shape[0]
-    how_many = np.min(pred_count, 8)
+    how_many = min(pred_count, 8)
 
     for _ in range(how_many):
         ix = random.randint(0, len(X) - 1)
