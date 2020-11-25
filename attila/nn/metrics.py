@@ -49,7 +49,7 @@ def iou(y_true, y_pred):
     return eps_divide(inter, union)
 
 
-def mean_IoU(y_true, y_pred, threshold=0.5):
+def mean_IoU(y_true, y_pred):
     """
     - y_true is a 3D array. Each channel represents the ground truth BINARY channel
     - y_pred is a 3D array. Each channel represents the predicted BINARY channel
@@ -75,6 +75,19 @@ def mean_DSC(y_true, y_pred, smooth=1.0):
     return np.mean(scores)
 
 
-def f(y_true, y_pred):
-    print(type(y_true))
-    print(y_true.shape)
+def batch_metric(metric):
+    def _f(y_true, y_pred):
+        true = y_true.numpy()
+        pred = y_pred.numpy()
+
+        batch_size = true.shape[0]
+        scores = [
+            metric(
+                true[batch, ...],
+                pred[batch, ...]
+            )
+            for batch in range(batch_size)
+        ]
+        return np.mean(scores)
+
+    return _f
