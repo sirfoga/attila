@@ -15,6 +15,14 @@ def get_figa(n_rows, n_cols):
     return fig, ax
 
 
+def get_mask(masks, ix):
+    background = masks[ix, ..., 0]
+    foreground = masks[ix, ..., 1]
+    borders = masks[ix, ..., 2]
+
+    return background, foreground, borders
+
+
 def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     if ix is None:
         ix = random.randint(0, len(X) - 1)
@@ -36,17 +44,15 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
 
     fig, ax = get_figa(1, 3)
 
-    mask_background = y[ix, ..., 0]
-    mask_foreground = y[ix, ..., 1]
-    mask_borders = y[ix, ..., 2]
+    background, foreground, borders = get_mask(y, ix)
 
-    ax[0].imshow(mask_background, cmap='gray')
+    ax[0].imshow(background, cmap='gray')
     ax[0].set_title('mask 1st channel: background')
 
-    ax[1].imshow(mask_foreground, cmap='gray')
+    ax[1].imshow(foreground, cmap='gray')
     ax[1].set_title('mask 2nd channel: foreground')
 
-    ax[2].imshow(mask_borders, cmap='gray')
+    ax[2].imshow(borders, cmap='gray')
     ax[2].set_title('mask 3rd channel: borders')
 
     if out_folder:
@@ -82,14 +88,14 @@ def plot_history(experiments, last=None, out_folder=None):
 
     def _plot_results(results, ax, title):
         _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.05], find_min=True)
-      # ax.legend()
+        # ax.legend() 
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
         _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.9, 1], find_max=True)
         _plot_key(ax, 'DSC', results, 'C2', scale=[0.9, 1], find_max=True)
 
-      # ax.legend()
+        # ax.legend()
 
         ax.set_title(title)
 
@@ -109,14 +115,19 @@ def plot_history(experiments, last=None, out_folder=None):
 
 def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
     for ix in range(len(preds)):
-        fig, ax = get_figa(1, 2)
+        fig, ax = get_figa(1, 3)
 
         ax[0].imshow(X[ix, ..., 0], cmap=cmap)
         ax[0].set_title('input image (sample #{})'.format(ix))
 
-        ax[1].imshow(preds[ix].squeeze(), cmap='gray')
-        ax[1].contour(y[ix].squeeze(), colors='yellow', levels=[0.5])
-        ax[1].set_title('prediction (ground truth as contour)')
+        ground_truth_background, ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
+        pred_background, pred_foreground, pred_borders = get_mask(preds, ix)
+
+        ax[1].imshow(pred_foreground, cmap='gray')
+        ax[1].set_title('pred foreground')
+        
+        ax[2].imshow(ground_truth_foreground, cmap='gray')
+        ax[2].set_title('ground truth foreground')
 
         if title:
             fig.suptitle(title)
