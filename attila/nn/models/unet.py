@@ -3,9 +3,6 @@ from tensorflow.keras.layers import MaxPooling2D, Conv2D, UpSampling2D, concaten
 from attila.nn.models.blocks import se_block, conv2d_block
 
 
-filter_mult = 2  # todo as arg
-
-
 def g(n):
     if n <= 1:
         return 2
@@ -134,13 +131,46 @@ def final_path(n_classes, activation, padding, use_se_block):
     return _f
 
 
-def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_activation, padding, use_skip_conn, use_se_block, dropout, batchnorm, conv_inner_layers):
+def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_activation, padding, use_skip_conn, use_se_block, dropout, batchnorm, conv_inner_layers, filter_mult):
     def _f(x):
-        x, skip_conns = contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_conn, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
-        x = middle_block(kernel_shape, padding, dropout, batchnorm, conv_inner_layers)(x)
+        x, skip_conns = contracting_path(
+            n_filters,
+            n_layers,
+            kernel_shape,
+            pool_shape,
+            use_skip_conn,
+            padding,
+            use_se_block,
+            dropout,
+            batchnorm,
+            conv_inner_layers
+        )(x)
+        
+        x = middle_block(
+            kernel_shape,
+            padding,
+            dropout,
+            batchnorm,
+            conv_inner_layers
+        )(x)
 
-        current_n_filters = skip_conns[-1].shape[-1] if use_skip_conn else n_filters * filter_mult ** (n_layers - 1)
-        x = expanding_path(current_n_filters, skip_conns, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
+        if use_skip_conn:
+            current_n_filters = skip_conns[-1].shape[-1]
+        else:
+            current_n_filters = n_filters * filter_mult ** (n_layers - 1)
+
+        x = expanding_path(
+            current_n_filters,
+            skip_conns,
+            kernel_shape,
+            pool_shape,
+            padding,
+            use_se_block,
+            dropout,
+            batchnorm,
+            conv_inner_layers
+        )(x)
+
         x = final_path(n_classes, final_activation, padding, use_se_block)(x)
         return x
 
@@ -148,7 +178,7 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
 
 
 def build(n_filters, n_layers, kernel_size, pool_size, n_classes, final_activation, padding='same', use_skip_conn=True, use_se_block=False, dropout=0.0, batchnorm=False):
-    n_dim = 2  # todo as arg
+    n_dim = 2  # 2D images only
     kernel_shape = (kernel_size, ) * n_dim
     pool_shape = (pool_size, ) * n_dim
 

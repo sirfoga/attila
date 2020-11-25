@@ -1,3 +1,5 @@
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+
 from sklearn.model_selection import train_test_split
 
 from attila.util.plots import plot_preds, plot_history, plot_sample
@@ -29,6 +31,7 @@ def get_default_args(config):
         'dropout': config.getfloat('unet', 'dropout'),
         'batchnorm': config.getboolean('unet', 'batchnorm'),
         'conv_inner_layers': config.getint('image', 'n conv inner layers'),
+        'filter_mult': config.getint('image', 'filter mult'),
     }
 
     compile_args = {
@@ -96,6 +99,12 @@ def do_experiment(experiment, data, config, out_folder):
 
     model, compile_args = get_model(experiment, config)
     weights_file = str(get_weights_file(out_folder, experiment['name']))
+    verbose = is_verbose('experiments', config)
+    callbacks = [
+        EarlyStopping(patience=10, verbose=verbose),
+        ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
+        ModelCheckpoint(weights_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
+    ]
 
     results = do_training(
         model,
@@ -107,7 +116,8 @@ def do_experiment(experiment, data, config, out_folder):
         config.getint('training', 'batch size'),
         config.getint('training', 'epochs'),
         compile_args,
-        is_verbose('experiments', config)
+        callbacks,
+        verbose
     )
 
     stats, preds = do_evaluation(

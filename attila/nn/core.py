@@ -1,6 +1,5 @@
 import numpy as np
 from tensorflow.keras import backend as K
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 from attila.nn.metrics import mean_IoU, mean_DSC
 
@@ -18,13 +17,7 @@ def describe_model(model):
     print('= # non-trainable params: {}'.format(non_trainable_params))
 
 
-def do_training(model, X_train, X_val, y_train, y_val, model_file, batch_size, n_epochs, compile_args, verbose):
-    callbacks = [  # todo as arg
-        EarlyStopping(patience=10, verbose=verbose),
-        ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
-        ModelCheckpoint(model_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
-    ]
-
+def do_training(model, X_train, X_val, y_train, y_val, batch_size, n_epochs, compile_args, callbacks, verbose):
     if verbose:
         describe_model(model)
 
