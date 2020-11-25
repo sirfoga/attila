@@ -93,6 +93,6 @@ def batch_metric(metric):
         ]
         scores = K.cast(scores, dtype='float32')
         return K.mean(scores)
-    
+
     _f.__name__ = 'batch_metric-{}'.format(metric.__name__)
     return _f

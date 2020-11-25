@@ -27,7 +27,7 @@ def create_tex_table_configurations(experiments, config):
 
 def create_tex_table_results(experiments):
     row_table_f = '{} & {} & {} \\\\'
-    metric_keys = ['mean IoU', 'DSC']
+    metric_keys = ['batch_metric-mean_IoU', 'batch_metric-mean_DSC']
 
     print('creating .tex table for {} experiments results\n'.format(len(experiments)))
 

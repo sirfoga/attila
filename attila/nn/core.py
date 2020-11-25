@@ -47,11 +47,11 @@ def do_inference(model, weights_file, X, batch_size, verbose):
 def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
     metrics = [
         {
-            'name': 'mean IoU',
+            'name': 'batch_metric-mean_IoU',
             'callback': mean_IoU
         },
         {
-            'name': 'DSC',
+            'name': 'batch_metric-mean_DSC',
             'callback': mean_DSC
         }
     ]

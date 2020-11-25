@@ -92,8 +92,8 @@ def plot_history(experiments, last=None, out_folder=None):
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
-        _plot_key(ax, 'mean_IoU', results, 'C0', scale=[0.95, 1], find_max=True)
-        _plot_key(ax, 'DSC', results, 'C2', scale=[0.95, 1], find_max=True)
+        _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.95, 1], find_max=True)
+        _plot_key(ax, 'batch_metric-mean_DSC', results, 'C2', scale=[0.95, 1], find_max=True)
 
         # ax.legend()
 
