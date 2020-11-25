@@ -15,7 +15,7 @@ def train_validate_test_split(X, y, valid_size, test_size, *args, **kwargs):
 def describe(X_train, X_val, X_test, y_train, y_val, y_test):
     print('= dataset training: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
     print('= dataset validation: X ~ {}, y ~ {}'.format(X_val.shape, y_val.shape))
-    print('= dataset test (not used): X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
+    print('= dataset test: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
 
 def get_model_output_folder(out_folder, model_name, mkdir=True):

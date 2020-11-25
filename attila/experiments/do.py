@@ -107,7 +107,7 @@ def do_experiment(experiment, data, config, out_folder):
         config.getint('training', 'epochs'),
         compile_args,
         is_verbose('experiments', config)
-    )
+    ) 
 
     stats, preds = do_evaluation(
         model,
@@ -182,7 +182,7 @@ def do_batch_experiments(experiments, data, config, out_folder):
 
             if is_verbose('experiments', config):
                 print('augmented training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
-
+	    
         # save sample for later processing
         plot_sample(X_train, y_train, out_folder=folder)
 
