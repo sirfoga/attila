@@ -27,24 +27,26 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     if ix is None:
         ix = random.randint(0, len(X) - 1)
 
-    fig, ax = get_figa(1, 3)
 
     img = X[ix, ...].squeeze()
 
-    im = ax[0].imshow(img, cmap=cmap)
-    fig.colorbar(im, ax=ax[0])
-    ax[0].set_title('input image')
+    im = plt.imshow(img, cmap=cmap)
+    plt.gcf().colorbar(im, ax=plt.gca())
+    if out_folder:
+        plt.gcf().savefig(out_folder / 'sample_input_{}.png'.format(ix))
+        plt.close()
 
-    ax[1].hist(img.ravel(), bins=256)
-    ax[1].set_title('histogram of image')
+    plt.gca().hist(img.ravel(), bins=256)
+    if out_folder:
+        plt.gcf().savefig(out_folder / 'sample_hist_{}.png'.format(ix))
+        plt.close()
 
     _, foreground, borders = get_mask(y, ix)
-    ax[2].imshow(foreground, cmap='gray')
-    ax[2].contour(borders, colors='red', levels=[0.5])
-    ax[2].set_title('mask 1st, 2nd and 3rd channel: background, foreground and borders')
-
+    plt.gca().imshow(foreground, cmap='gray')
+    plt.gca().contour(borders, colors='red', levels=[0.5])
+    plt.gca().set_title('mask 1st, 2nd and 3rd channel: background, foreground and borders')
     if out_folder:
-        fig.savefig(out_folder / 'sample_{}.png'.format(ix))
+        plt.gcf().savefig(out_folder / 'sample_mask_{}.png'.format(ix))
         plt.close()
 
     return ix
@@ -108,24 +110,18 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
     for _ in range(how_many):
         ix = random.randint(0, len(X) - 1)
 
-        fig, ax = get_figa(1, 2)
-
-        ax[0].imshow(X[ix, ..., 0], cmap=cmap)
-        ax[0].set_title('input image (sample #{})'.format(ix))
+        plt.imshow(X[ix, ..., 0], cmap=cmap)
+        if out_folder:
+            plt.gcf().savefig(out_folder / 'ground_truth_{}.png'.format(ix))
+            plt.close()
 
         _, ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
         ground_truth = ground_truth_foreground + ground_truth_borders
 
         _, pred_foreground, pred_borders = get_mask(preds, ix)
-        pred = pred_foreground + pred_borders
 
-        ax[1].imshow(pred_foreground, cmap='gray')
-        ax[1].contour(ground_truth, colors='red', levels=[0.5])
-        ax[1].set_title('ground truth (red contour) VS prediction')
-
-        if title:
-            fig.suptitle(title)
-
+        plt.imshow(pred_foreground, cmap='gray')
+        plt.contour(ground_truth, colors='red', levels=[0.5])
         if out_folder:
-            fig.savefig(out_folder / 'ground_truth_VS_pred_{}.png'.format(ix))
+            plt.gcf().savefig(out_folder / 'pred_{}.png'.format(ix))
             plt.close()
