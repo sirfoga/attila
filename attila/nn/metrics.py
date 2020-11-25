@@ -16,7 +16,7 @@ def metric_per_channel(y_true, y_pred, metric):
         true = y_true[..., channel]
         pred = y_pred[..., channel]
 
-        scores.append(iou(true, pred))
+        scores.append(metric(true, pred))
 
     return scores
 
@@ -29,12 +29,13 @@ def eps_divide(n, d, eps=K.epsilon()):
 
 
 def get_intersection(y_true, y_pred):
-    return np.sum(y_true * y_pred)  # TP
+    elem_wise_prod = y_true * y_pred
+    return K.sum(elem_wise_prod)  # TP
 
 
 def get_union(y_true, y_pred):
     inter = get_intersection(y_true, y_pred)
-    alls = np.sum(y_true + y_pred)  # TP + FP + TP + FN
+    alls = K.sum(y_true + y_pred)  # TP + FP + TP + FN
     return alls - inter  # TP + FP + FN
 
 
