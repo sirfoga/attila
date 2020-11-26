@@ -52,8 +52,8 @@ def mean_IoU(threshold=0.5):
     # return iou(y_true, y_pred)
 
     def _f(y_true, y_pred):
-        y_pred = K.cast(K.greater(y_pred, threshold), dtype='float32')
-        y_true = K.cast(K.greater(y_true, threshold), dtype='float32')
+        y_pred = K.cast(K.greater(y_pred[..., 1:], threshold), dtype='float32')  # do not count background
+        y_true = K.cast(K.greater(y_true[..., 1:], threshold), dtype='float32')
 
         inter = K.sum(K.sum(K.squeeze(y_true * y_pred, axis=3), axis=2), axis=1)
         union = K.sum(K.sum(K.squeeze(y_true + y_pred, axis=3), axis=2), axis=1) - inter
@@ -71,8 +71,8 @@ def DSC(smooth=1.0, threshold=0.5):
     """
 
     def _f(y_true, y_pred):
-        y_pred = K.cast(K.greater(y_pred, threshold), dtype='float32')
-        y_true = K.cast(K.greater(y_true, threshold), dtype='float32')
+        y_pred = K.cast(K.greater(y_pred[..., 1:], threshold), dtype='float32')  # do not count background
+        y_true = K.cast(K.greater(y_true[..., 1:], threshold), dtype='float32')
 
         inter = K.sum(K.sum(K.squeeze(y_true * y_pred, axis=3), axis=2), axis=1)
         union = K.sum(K.sum(K.squeeze(y_true + y_pred, axis=3), axis=2), axis=1)

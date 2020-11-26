@@ -7,7 +7,7 @@ from attila.util.plots import plot_preds, plot_history, plot_sample
 
 from attila.nn.models.unet import calc_out_size, build as build_model
 from attila.nn.core import do_training, do_evaluation
-from attila.nn.metrics import batch_metric, DSC
+from attila.nn.metrics import mean_IoU, DSC
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation, do_transformations
