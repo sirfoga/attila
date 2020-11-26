@@ -25,9 +25,5 @@ srun::
 	--account=p_ml_cv \
 	--pty zsh
 
-run::
-	source ./tools/cluster/requirements.sh
-	source ./tools/cluster/run.sh
-
 hello::
 	@echo "hello ${USER} !"
