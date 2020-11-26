@@ -35,7 +35,7 @@ def create_tex_table_results(experiments):
     print('creating .tex table for {} experiments results\n'.format(len(experiments)))
 
     for experiment in experiments:
-        results = experiment['eval']
+        results = experiment['stats']
         for key in metric_keys:  # save for later processing
             experiment[key] = np.mean(results[key])
 
