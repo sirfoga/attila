@@ -36,7 +36,11 @@ def do_training(model, X_train, X_val, y_train, y_val, batch_size, n_epochs, com
 
 
 def do_inference(model, X, batch_size, verbose):
-    return model.predict(X, verbose=verbose, batch_size=batch_size)
+    return model.predict(
+        X,
+        verbose=1 if verbose else 0,
+        batch_size=batch_size
+    )
 
 
 def do_evaluation(model, X_test, y_test, batch_size, verbose):

@@ -7,7 +7,7 @@ from attila.util.plots import plot_preds, plot_history, plot_sample
 
 from attila.nn.models.unet import calc_out_size, build as build_model
 from attila.nn.core import do_training, do_evaluation
-from attila.nn.metrics import batch_metric, mean_IoU, DSC
+from attila.nn.metrics import batch_metric, DSC
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation, do_transformations
@@ -45,7 +45,7 @@ def get_default_args(config):
     compile_args = {
         'optimizer': config.get('training', 'optimizer'),
         'loss': config.get('training', 'loss'),
-        'metrics': ['accuracy', batch_metric(mean_IoU), batch_metric(DSC)]
+        'metrics': ['accuracy', mean_IoU, DSC]
     }
 
     return model_args, compile_args
