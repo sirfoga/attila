@@ -111,8 +111,19 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
     weights_file = str(get_weights_file(out_folder, experiment['name']))
     callbacks = [
         EarlyStopping(patience=10, verbose=verbose),
-        ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
-        ModelCheckpoint(weights_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
+        ReduceLROnPlateau(
+            factor=1e-1,
+            patience=3,
+            min_lr=1e-5,
+            verbose=verbose
+        ),
+        ModelCheckpoint(
+            weights_file,
+            monitor='loss',
+            verbose=verbose,
+            save_best_only=True,
+            save_weights_only=True
+            )
     ]
 
     results = do_training(
@@ -186,9 +197,10 @@ def do_batch_experiments(experiments, data, config, out_folder):
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X, y, test_size=config.getfloat('experiments', 'test size')
     )
+    num_plots = 6
     plot_ids = [
         random.randint(0, len(X_test) - 1)
-        for _ in range(6)
+        for _ in range(num_plots)
     ]
     if is_verbose('experiments', config):
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
@@ -219,9 +231,8 @@ def do_batch_experiments(experiments, data, config, out_folder):
             if is_verbose('experiments', config):
                 print('augmented training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
 
-        # save sample for later processing
         plot_sample(X_train, y_train, out_folder=folder)
-
+        
         data = (X_train, X_val, X_test, y_train, y_val, y_test)
         results = do_experiments(
             experiments,

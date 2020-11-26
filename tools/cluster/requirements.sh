@@ -1,7 +1,7 @@
 KERNEL_NAME="attila"
 KERNELS_DIR=/home/${USER}/kernels/
 
-module purge
+module --force purge
 module load modenv/ml
 module load PythonAnaconda/3.7
 
