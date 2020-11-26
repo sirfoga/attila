@@ -1,9 +1,16 @@
-srun --pty -p ml -n 1 -c 2 --gres=gpu:1 --mem-per-cpu 2583 -t 01:00:00 -A p_ml_cv zsh
+srun \
+--partition=ml \
+--nodes=1 \
+--tasks=1 \
+--cpus-per-task=2 \
+--gres=gpu:1 \
+--mem-per-cpu=2583 \
+--time=01:00:00 \
+--account=p_ml_cv \
+--pty zsh
 
 KERNEL_NAME="attila"
 KERNELS_DIR=/home/${USER}/kernels/
-
-mkdir -p ${KERNELS_DIR}
 
 module purge
 module load modenv/ml
@@ -17,7 +24,9 @@ module load matplotlib
 module load Pillow
 
 conda create --prefix ${KERNELS_DIR}/${KERNEL_NAME} python=3.7.4
-source activate ${KERNELS_DIR}/${KERNEL_NAME}
+conda deactivate
+conda activate ${KERNELS_DIR}/${KERNEL_NAME}
+which python  # check 
 conda install ipykernel
 python -m ipykernel install --user --name "${KERNEL_NAME}"
 
