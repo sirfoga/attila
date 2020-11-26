@@ -29,15 +29,27 @@ def save_experiments(experiments, experiments_file):
         json.dump(str(out), fp)
 
 
+def parse_experiment(experiment):
+    return {
+        k: np.array(v) if is_lst(v) else v
+        for k, v in experiment.items()
+    }
+
+
+def parse_experiments(raw_json):
+    experiments = ast.literal_eval(raw_json)
+    return [
+        parse_experiment(experiment)
+        for experiment in experiments
+    ]
+
+
 def load_experiments(experiments_file):
     with open(experiments_file, 'r') as fp:
-        experiments = ast.literal_eval(json.load(fp))
-        experiments = [
-            {
-                k: np.array(v) if is_lst(v) else v
-                for k, v in experiment.items()
-            }
-            for experiment in experiments
-        ]
+        return parse_experiments(json.load(fp))
 
-        return experiments
+
+def load_experiment(experiments_file):
+    with open(experiments_file, 'r') as fp:
+        experiment = ast.literal_eval(json.load(fp))
+        return parse_experiment(experiment)
