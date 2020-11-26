@@ -62,7 +62,7 @@ def create_tex_table_results(experiments):
                 experiment[key] = '\\textbf{{{:.3f}}}'.format(experiment[key])
             else:
                 delta = 100 - 100 * experiment[key] / best_values[key]
-                experiment[key] = '{:.3f} (-{:.1f} \%)'.format(experiment[key], delta)
+                experiment[key] = '{:.3f} (-{:.1f} \\%)'.format(experiment[key], delta)
 
         row_table = row_table_f.format(
             experiment['name'],
@@ -106,7 +106,7 @@ def create_tex_table_runs_results(runs):
                 results[key] = '\\textbf{{{:.3f}}}'.format(results[key])
             else:
                 delta = 100 - 100 * results[key] / best_values[key]
-                results[key] = '{:.3f} (-{:.1f} \%)'.format(results[key], delta)
+                results[key] = '{:.3f} (-{:.1f} \\%)'.format(results[key], delta)
 
         row_table = row_table_f.format(
             model_name,
