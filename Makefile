@@ -2,7 +2,7 @@ cwd				:= $(shell pwd)
 
 
 clean::
-	rm out/
+	rm -rf out/
 
 cleanh5::
 	for f in $$(find . -name "*.h5"); do rm $${f}; done
