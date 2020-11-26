@@ -30,6 +30,7 @@ def calc_out_size(n_layers, conv_layers, conv_size, pool_size, padding):
         crop_size = calc_crop_size(n_layers, conv_layers, conv_size, padding)
 
         if padding == 'valid':
+            x = _sub_tup(x, conv_crop)  # adjust
             x = _sub_tup(x, conv_crop)  # first
             x = _sub_tup(x, crop_size)  # until last concatenation
             x = _sub_tup(x, conv_crop)  # final
@@ -56,6 +57,11 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
     def _f(x):
         skip_conns = []
         current_n_filters = n_filters
+
+        if padding == 'valid':
+            crop_size = 4
+            crop_size = int(crop_size / 2)  # side by side
+            x = Cropping2D(crop_size)(x)
 
         for _ in range(n_layers):
             x, s = contracting_block(current_n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
@@ -112,7 +118,7 @@ def expanding_path(n_filters, skip_conns, kernel_shape, pool_shape, padding, use
                 crop_size = int(crop_size / 2)  # side by side
                 skip_conn = Cropping2D(crop_size)(skip_conn)
 
-            x = expanding_block(current_n_filters, skip_conn, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm)(x)
+            x = expanding_block(current_n_filters, skip_conn, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
             current_n_filters = int(current_n_filters / filter_mult)
 
         return x

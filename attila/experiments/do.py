@@ -105,6 +105,7 @@ def do_experiment(experiment, data, config, out_folder):
         ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
         ModelCheckpoint(weights_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
     ]
+    model.summary()
 
     results = do_training(
         model,
@@ -112,7 +113,6 @@ def do_experiment(experiment, data, config, out_folder):
         X_val,
         y_train,
         y_val,
-        weights_file,
         config.getint('training', 'batch size'),
         config.getint('training', 'epochs'),
         compile_args,
