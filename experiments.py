@@ -8,8 +8,28 @@ from attila.experiments.do import do_experiments
 _here = Path('.').resolve()
 
 
+def check_input(config):
+    def _is_square_img():
+        return config.getint('image', 'width') == config.getint('image', 'height')
+
+    def _is_integer(x):
+        return x % 1 == 0
+
+    def _is_good_input():
+        # b = config.getint('image', 'width')  # input size
+        # d = 
+        # gamma = 
+        # pool_size = 
+        # a = (b - (2 ** d - 1) * gamma) / 2 ** d
+        assert _is_integer(0.0)
+
+    assert _is_square_img()  # only square images are supported
+
+
+
 def main():
   config = get_config(_here / './config.ini')
+  check_input(config)
 
   data_path = _here / config.get('data', 'folder')
   data_path = data_path.resolve()

@@ -58,4 +58,8 @@ def parse_data(raw, img_shape):
         base_transformations + [img2channels()]
     )
 
+    # todo assert
+    # - y has 3 channels and each one has > 10 "1" pixels
+    # - X has 1 channel
+
     return X, y

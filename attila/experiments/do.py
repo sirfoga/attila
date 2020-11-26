@@ -18,14 +18,11 @@ from attila.experiments.data import save_experiments
 
 
 def get_default_args(config):
-    conv_kernel_size = 3
-    pool_size = 2
-
     model_args = {
         'n_filters': config.getint('unet', 'n filters'),
         'n_layers': config.getint('unet', 'n layers'),
-        'kernel_size': conv_kernel_size,
-        'pool_size': pool_size,
+        'kernel_size': config.getint('unet', 'conv kernel size'),
+        'pool_size': config.getint('unet', 'pool size'),
         'n_classes': config.getint('image', 'n classes'),
         'final_activation': config.get('unet', 'final activation'),
         'dropout': config.getfloat('unet', 'dropout'),
@@ -51,6 +48,7 @@ def get_experiment_args(experiment, config):
         'use_skip_conn': experiment['use_skip_conn'],
         'use_se_block': experiment['use_se_block']
     }
+
     return args, compile_args
 
 
@@ -105,7 +103,6 @@ def do_experiment(experiment, data, config, out_folder):
         ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
         ModelCheckpoint(weights_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
     ]
-    model.summary()
 
     results = do_training(
         model,
@@ -138,7 +135,14 @@ def do_experiment(experiment, data, config, out_folder):
         out_folder=get_model_output_folder(out_folder, experiment['name'])
     )
 
-    return results, stats
+    summary = {
+        'history': results.history,
+        'stats': stats
+    }
+    out_f = get_model_output_folder(out_folder, experiment['name']) / 'summary.json'
+    save_experiments(summary, out_f)
+
+    return summary
 
 
 def do_experiments(experiments, data, config, out_folder):
@@ -149,9 +153,9 @@ def do_experiments(experiments, data, config, out_folder):
         if is_verbose('experiments', config):
             print('=== experiment #{} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
 
-        results, eval_stats = do_experiment(experiment, data, config, out_folder)
-        experiments[i]['history'] = results.history
-        experiments[i]['eval'] = eval_stats
+        summary = do_experiment(experiment, data, config, out_folder)
+        experiments[i]['history'] = summary['history']
+        experiments[i]['stats'] = summary['stats']
 
     last_epochs = int(config.getint('training', 'epochs') * 0.8)
     plot_history(experiments, last=last_epochs, out_folder=out_folder)
