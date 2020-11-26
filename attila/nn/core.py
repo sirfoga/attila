@@ -46,7 +46,7 @@ def do_evaluation(model, X_test, y_test, batch_size, verbose):
             'callback': mean_IoU
         },
         {
-            'name': 'batch_metric-mean_DSC',
+            'name': 'batch_metric-DSC',
             'callback': DSC
         }
     ]
