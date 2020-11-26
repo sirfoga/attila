@@ -26,9 +26,12 @@ def do_training(model, X_train, X_val, y_train, y_val, batch_size, n_epochs, com
         X_train,
         y_train,
         batch_size=batch_size,
+        validation_batch_size=batch_size,
         epochs=n_epochs,
         callbacks=callbacks,
-        validation_data=(X_val, y_val)
+        validation_data=(X_val, y_val),
+        workers=1,
+        use_multiprocessing=False,
     )  # history
 
 
