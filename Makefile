@@ -1,6 +1,4 @@
 cwd				:= $(shell pwd)
-
-
 clean::
 	rm -rf out/
 
@@ -21,7 +19,7 @@ srun::
 	--cpus-per-task=2 \
 	--gres=gpu:1 \
 	--mem-per-cpu=4096 \
-	--time=02:00:00 \
+	--time=01:00:00 \
 	--account=p_ml_cv \
 	--pty zsh
 
