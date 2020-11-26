@@ -8,4 +8,4 @@ def get_config(file_path):
 
 
 def is_verbose(key, config):
-    return config.getint(key, 'verbose')
+    return config.getint(key, 'verbose')  # todo get bool

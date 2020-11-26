@@ -1,7 +1,7 @@
 import numpy as np
 from tensorflow.keras import backend as K
 
-from attila.nn.metrics import mean_IoU, mean_DSC
+from attila.nn.metrics import mean_IoU, DSC
 
 
 def describe_model(model):
@@ -47,7 +47,7 @@ def do_evaluation(model, X_test, y_test, batch_size, verbose):
         },
         {
             'name': 'batch_metric-mean_DSC',
-            'callback': mean_DSC
+            'callback': DSC
         }
     ]
 

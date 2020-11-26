@@ -1,4 +1,3 @@
-import numpy as np
 from tensorflow.keras import backend as K
 
 
@@ -21,11 +20,21 @@ def metric_per_channel(y_true, y_pred, metric):
     return scores
 
 
+def get_foreground(x):
+    fore = x[..., 1]
+    borders = x[..., 2]
+
+    return K.sum(fore, borders)
+
 
 def eps_divide(n, d, eps=K.epsilon()):
     """ perform division using eps """
-    
+
     return (n + eps) / (d + eps)
+
+
+def do_threshold(x, threshold=0.5):
+    return K.cast(K.greater(x, threshold), dtype='float32')
 
 
 def get_intersection(y_true, y_pred):
@@ -56,26 +65,25 @@ def mean_IoU(y_true, y_pred):
     - y_pred is a 3D array. Each channel represents the predicted BINARY channel
     """
 
-    scores = metric_per_channel(y_true, y_pred, iou)
-    scores = K.cast(scores, dtype='float32')
-    return K.mean(scores)
+    # todo mean over ALL classes
+    y_true = do_threshold(get_foreground(y_true))
+    y_pred = do_threshold(get_foreground(y_pred))
+    return iou(y_true, y_pred)
 
 
-def DSC(y_true, y_pred, smooth=1.0):
+def DSC(y_true, y_pred, smooth=1.0, threshold=0.5):
     """
     - y_true is a 2D array representing the ground truth BINARY image
     - y_pred is a 2D array representing the predicted BINARY image
     """
 
+    y_true = do_threshold(get_foreground(y_true))
+    y_pred = do_threshold(get_foreground(y_pred))
+
     tp = get_intersection(y_true, y_pred)
     tp_fp_fn = get_union(y_true, y_pred) + tp
+
     return eps_divide(2.0 * tp, tp + tp_fp_fn, eps=smooth)
-
-
-def mean_DSC(y_true, y_pred):
-    scores = metric_per_channel(y_true, y_pred, DSC)
-    scores = K.cast(scores, dtype='float32')
-    return K.mean(scores)
 
 
 def batch_metric(metric):

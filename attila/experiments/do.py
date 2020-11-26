@@ -1,4 +1,4 @@
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 from sklearn.model_selection import train_test_split
 
@@ -6,7 +6,7 @@ from attila.util.plots import plot_preds, plot_history, plot_sample
 
 from attila.nn.models.unet import calc_out_size, build as build_model
 from attila.nn.core import do_training, do_evaluation
-from attila.nn.metrics import batch_metric, mean_IoU, mean_DSC
+from attila.nn.metrics import batch_metric, mean_IoU, DSC
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation, do_transformations
@@ -15,6 +15,16 @@ from attila.data.augment import do_augmentations, flip, flop
 from attila.util.config import is_verbose
 
 from attila.experiments.data import save_experiments, save_experiment
+
+
+def get_experiments(options):
+    # `options` is like
+    # {
+    #     'use_skip_conn': [True, False],
+    #     'padding': ['same', 'valid'],
+    #     'use_se_block': [True, False]
+    # }
+    return []  # todo
 
 
 def get_default_args(config):
@@ -34,7 +44,7 @@ def get_default_args(config):
     compile_args = {
         'optimizer': config.get('training', 'optimizer'),
         'loss': config.get('training', 'loss'),
-        'metrics': ['accuracy', batch_metric(mean_IoU), batch_metric(mean_DSC)]
+        'metrics': ['accuracy', batch_metric(mean_IoU), batch_metric(DSC)]
     }
 
     return model_args, compile_args
@@ -115,7 +125,7 @@ def do_experiment(experiment, data, config, out_folder):
         callbacks,
         verbose
     )
-    # todo this causes a lot of stucks model.save(weights_file)
+    # todo model.save(weights_file)
 
     stats, preds = do_evaluation(
         model,

@@ -111,7 +111,7 @@ def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
 
         plt.imshow(X[ix, ..., 0], cmap=cmap)
         if out_folder:
-            plt.gcf().savefig(out_folder / 'ground_truth_{}.png'.format(ix))
+            plt.gcf().savefig(out_folder / 'input_{}.png'.format(ix))
             plt.close()
 
         _, ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
