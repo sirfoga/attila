@@ -14,7 +14,7 @@ from attila.data.augment import do_augmentations, flip, flop
 
 from attila.util.config import is_verbose
 
-from attila.experiments.data import save_experiments
+from attila.experiments.data import save_experiments, save_experiment
 
 
 def get_default_args(config):
@@ -140,7 +140,7 @@ def do_experiment(experiment, data, config, out_folder):
         'stats': stats
     }
     out_f = get_model_output_folder(out_folder, experiment['name']) / 'summary.json'
-    save_experiments(summary, out_f)
+    save_experiment(summary, out_f)
 
     return summary
 

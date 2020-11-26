@@ -45,11 +45,11 @@ def main():
     (config.getint('image', 'width'), config.getint('image', 'height'))
   )
 
-  experiments_file = _here / config.get('experiments', 'output file')
+  # experiments_file = _here / config.get('experiments', 'output file')
   experiments = load_experiments(experiments_file)
   do_experiments(experiments, (X, y), config, out_folder)
 
-  save_experiments(experiments, out_folder / config.get('experiments', 'output file'))
+  # save_experiments(experiments, out_folder / config.get('experiments', 'output file'))
 
 
 if __name__ == '__main__':
