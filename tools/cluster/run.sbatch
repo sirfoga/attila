@@ -12,6 +12,6 @@
 #SBATCH --error=%j.err
 
 source ./requirements.sh
-source ./runner.sh
+source ./run.sh
 
 exit 0

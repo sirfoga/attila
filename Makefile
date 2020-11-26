@@ -12,3 +12,22 @@ r-update::
 
 get-out::
 	scp -r stfo194b@taurus.hrsk.tu-dresden.de:/home/stfo194b/martin/attila/out .
+
+srun::
+	srun \
+	--partition=ml \
+	--nodes=1 \
+	--tasks=1 \
+	--cpus-per-task=2 \
+	--gres=gpu:1 \
+	--mem-per-cpu=4096 \
+	--time=02:00:00 \
+	--account=p_ml_cv \
+	--pty zsh
+
+run::
+	source ./tools/cluster/requirements.sh
+	source ./tools/cluster/run.sh
+
+hello::
+	@echo "hello ${USER} !"
