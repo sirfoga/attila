@@ -45,7 +45,7 @@ def get_default_args(config):
     compile_args = {
         'optimizer': config.get('training', 'optimizer'),
         'loss': config.get('training', 'loss'),
-        'metrics': ['accuracy', mean_IoU, DSC]
+        'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
     return model_args, compile_args
