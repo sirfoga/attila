@@ -1,3 +1,4 @@
+import random
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 from sklearn.model_selection import train_test_split
@@ -67,7 +68,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, config, out_folder):
+def do_experiment(experiment, data, config, out_folder, plot_ids):
     def _crop_data(img_out_shape):
         def _f(x):
             output_shape = (*img_out_shape, config.getint('image', 'n classes'))
@@ -141,6 +142,7 @@ def do_experiment(experiment, data, config, out_folder):
         X_test,
         y_test,
         preds,
+        plot_ids,
         cmap=config.get('image', 'cmap'),
         title='model: {}'.format(experiment['name']),
         out_folder=model_out_folder
@@ -163,7 +165,7 @@ def do_experiment(experiment, data, config, out_folder):
     return summary
 
 
-def do_experiments(experiments, data, config, out_folder):
+def do_experiments(experiments, data, config, out_folder, plot_ids):
     if is_verbose('experiments', config):
         print('ready to perform {} experiments'.format(len(experiments)))
 
@@ -171,7 +173,7 @@ def do_experiments(experiments, data, config, out_folder):
         if is_verbose('experiments', config):
             print('=== experiment #{} / {}: {}'.format(i + 1, len(experiments), experiment['name']))
 
-        summary = do_experiment(experiment, data, config, out_folder)
+        summary = do_experiment(experiment, data, config, out_folder, plot_ids)
         experiments[i]['history'] = summary['history']
         experiments[i]['stats'] = summary['stats']
 
@@ -184,6 +186,10 @@ def do_batch_experiments(experiments, data, config, out_folder):
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X, y, test_size=config.getfloat('experiments', 'test size')
     )
+    plot_ids = [
+        random.randint(0, len(X_test) - 1)
+        for _ in range(6)
+    ]
     if is_verbose('experiments', config):
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
@@ -221,7 +227,8 @@ def do_batch_experiments(experiments, data, config, out_folder):
             experiments,
             data,
             config,
-            folder
+            folder,
+            plot_ids=plot_ids
         )
         out_f = folder / config.get('experiments', 'output file')
         save_experiments(results, out_f)

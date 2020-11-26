@@ -1,4 +1,3 @@
-import random
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -96,13 +95,8 @@ def plot_history(history, last=None, out_folder=None):
         plt.close()
 
 
-def plot_preds(X, y, preds, cmap, title=None, out_folder=None):
-    pred_count = preds.shape[0]
-    how_many = min(pred_count, 8)
-
-    for _ in range(how_many):
-        ix = random.randint(0, len(X) - 1)
-
+def plot_preds(X, y, preds, ixs, cmap, title=None, out_folder=None):
+    for ix in ixs:
         plt.imshow(X[ix, ..., 0], cmap=cmap)
         if out_folder:
             plt.gcf().savefig(out_folder / 'input_{}.png'.format(ix))
