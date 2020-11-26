@@ -52,13 +52,13 @@ def contracting_block(n_filters, kernel_shape, pool_shape, padding, use_se_block
     return _f
 
 
-def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_conn, padding, use_se_block, dropout, batchnorm):
+def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_conn, padding, use_se_block, dropout, batchnorm, conv_inner_layers, filter_mult):
     def _f(x):
         skip_conns = []
         current_n_filters = n_filters
 
         for _ in range(n_layers):
-            x, s = contracting_block(current_n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm)(x)
+            x, s = contracting_block(current_n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
             current_n_filters = int(current_n_filters * filter_mult)
 
             if not use_skip_conn:
@@ -71,7 +71,7 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
     return _f
 
 
-def middle_block(kernel_shape, padding, dropout, batchnorm, conv_inner_layers):
+def middle_block(kernel_shape, padding, dropout, batchnorm, conv_inner_layers, filter_mult):
     use_se_block = False
 
     def _f(x):
@@ -177,7 +177,7 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
     return _f
 
 
-def build(n_filters, n_layers, kernel_size, pool_size, n_classes, final_activation, padding='same', use_skip_conn=True, use_se_block=False, dropout=0.0, batchnorm=False):
+def build(n_filters, n_layers, kernel_size, pool_size, n_classes, final_activation, padding='same', use_skip_conn=True, use_se_block=False, dropout=0.0, batchnorm=False, conv_inner_layers=2, filter_mult=2):
     n_dim = 2  # 2D images only
     kernel_shape = (kernel_size, ) * n_dim
     pool_shape = (pool_size, ) * n_dim
@@ -198,7 +198,9 @@ def build(n_filters, n_layers, kernel_size, pool_size, n_classes, final_activati
         use_skip_conn,
         use_se_block,
         dropout,
-        batchnorm
+        batchnorm,
+        conv_inner_layers,
+        filter_mult
     )(inp)
 
     model = Model(inputs=inp, outputs=out)

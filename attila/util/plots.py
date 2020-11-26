@@ -44,7 +44,6 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     _, foreground, borders = get_mask(y, ix)
     plt.gca().imshow(foreground, cmap='gray')
     plt.gca().contour(borders, colors='red', levels=[0.5])
-    plt.gca().set_title('mask 1st, 2nd and 3rd channel: background, foreground and borders')
     if out_folder:
         plt.gcf().savefig(out_folder / 'sample_mask_{}.png'.format(ix))
         plt.close()

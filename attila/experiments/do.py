@@ -30,8 +30,8 @@ def get_default_args(config):
         'final_activation': config.get('unet', 'final activation'),
         'dropout': config.getfloat('unet', 'dropout'),
         'batchnorm': config.getboolean('unet', 'batchnorm'),
-        'conv_inner_layers': config.getint('image', 'n conv inner layers'),
-        'filter_mult': config.getint('image', 'filter mult'),
+        'conv_inner_layers': config.getint('unet', 'n conv inner layers'),
+        'filter_mult': config.getint('unet', 'filter mult'),
     }
 
     compile_args = {
