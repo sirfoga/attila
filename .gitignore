@@ -5,6 +5,7 @@ data/
 *core.taurusml*
 *.json
 out/
+out.*/
 */out/*
 .vscode/
 config.ini
