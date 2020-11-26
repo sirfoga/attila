@@ -129,7 +129,9 @@ def append2(stuff, out_file):
 
 
 def append_rows2(rows, out_file):
-    append2('\n'.join(rows), out_file)
+    stuff = '\n'.join(rows)
+    stuff = '\n' + stuff + '\n'
+    append2(stuff, out_file)
 
 
 def create_tex_experiments(config, out_folder, out_file=None):
