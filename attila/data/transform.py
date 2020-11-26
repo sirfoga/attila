@@ -53,19 +53,6 @@ def add_dim():
     return _f
 
 
-def get_background(img):
-    """ gets background of grayscale img """
-
-    place_holder = 42
-
-    out = img.copy()
-    out[out < 1] = place_holder
-    out[out == 1] = 0
-    out[out == place_holder] = 1
-
-    return out
-
-
 def get_borders(img):
     """ gets borders of img """
 
@@ -88,12 +75,10 @@ def img2channels():
     """ splits grayscale 2d img to 3 channels: background, foreground, borders """
 
     def _f(x):
-        background = get_background(x)
         borders = get_borders(x)
         foreground = get_foreground(x, borders)
 
-        out = np.append(add_dim()(background), add_dim()(foreground), axis=2)
-        out = np.append(out, add_dim()(borders), axis=2)
+        out = np.append(add_dim()(foreground), add_dim()(borders), axis=2)
 
         return out
 

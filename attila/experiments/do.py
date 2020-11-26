@@ -71,7 +71,7 @@ def get_model(experiment, config):
 def do_experiment(experiment, data, config, out_folder, plot_ids):
     def _crop_data(img_out_shape):
         def _f(x):
-            output_shape = (*img_out_shape, config.getint('image', 'n classes'))
+            output_shape = (*img_out_shape, config.getint('image', 'n classes') - 1)
             return do_transformations(
                 x,
                 [

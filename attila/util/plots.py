@@ -16,11 +16,10 @@ def get_figa(n_rows, n_cols):
 
 
 def get_mask(masks, ix):
-    background = masks[ix, ..., 0]
-    foreground = masks[ix, ..., 1]
-    borders = masks[ix, ..., 2]
+    foreground = masks[ix, ..., 0]
+    borders = masks[ix, ..., 1]
 
-    return background, foreground, borders
+    return foreground, borders
 
 
 def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
@@ -41,7 +40,7 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
         plt.gcf().savefig(out_folder / 'sample_hist_{}.png'.format(ix))
         plt.close()
 
-    _, foreground, borders = get_mask(y, ix)
+    foreground, borders = get_mask(y, ix)
     plt.gca().imshow(foreground, cmap='gray')
     plt.gca().contour(borders, colors='red', levels=[0.5])
     if out_folder:
@@ -101,10 +100,10 @@ def plot_preds(X, y, preds, ixs, cmap, title=None, out_folder=None):
             plt.gcf().savefig(out_folder / 'input_{}.png'.format(ix))
             plt.close()
 
-        _, ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
+        ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
         ground_truth = ground_truth_foreground + ground_truth_borders
 
-        _, pred_foreground, pred_borders = get_mask(preds, ix)
+        pred_foreground, pred_borders = get_mask(preds, ix)
 
         plt.imshow(pred_foreground, cmap='gray')
         plt.contour(ground_truth, colors='red', levels=[0.5])
