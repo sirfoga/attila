@@ -2,10 +2,10 @@ srun \
 --partition=ml \
 --nodes=1 \
 --tasks=1 \
---cpus-per-task=2 \
+--cpus-per-task=1 \
 --gres=gpu:1 \
 --mem-per-cpu=2583 \
---time=01:00:00 \
+--time=00:30:00 \
 --account=p_ml_cv \
 --pty zsh
 
@@ -25,7 +25,7 @@ module load Pillow
 
 conda create --prefix ${KERNELS_DIR}/${KERNEL_NAME} python=3.7.4
 conda deactivate
-conda activate ${KERNELS_DIR}/${KERNEL_NAME}
+conda activate ${KERNELS_DIR}/${KERNEL_NAME}  # or source
 which python  # check 
 conda install ipykernel
 python -m ipykernel install --user --name "${KERNEL_NAME}"
