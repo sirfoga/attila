@@ -55,9 +55,7 @@ def plot_history(history, last=None, out_folder=None):
     if last is None:
         last = 0
 
-    n_cols = 2
-    n_rows = int(1)
-    fig, ax = get_figa(n_rows, n_cols)
+    fig, ax = plt.subplots()
 
     def _plot_key(ax, key, results, color, scale=None, find_min=False, find_max=False):
         training = results[key]
