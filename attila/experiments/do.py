@@ -32,7 +32,7 @@ def get_default_args(config):
     model_args = {
         'n_filters': config.getint('unet', 'n filters'),
         'n_layers': config.getint('unet', 'n layers'),
-        'kernel_size': config.getint('unet', 'conv kernel size'),
+        'kernel_size': config.getint('unet', 'conv size'),
         'pool_size': config.getint('unet', 'pool size'),
         'n_classes': config.getint('image', 'n classes'),
         'final_activation': config.get('unet', 'final activation'),
