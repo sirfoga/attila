@@ -13,8 +13,7 @@ def do_threshold(x, threshold=0.5):
 
 def get_binary_img(x, threshold=0.5):
     x = K.sum(
-        x[..., 1],  # foreground
-        x[..., 2],  # borders
+        x[..., 1] + x[..., 2],  # foreground + borders
         axis=3
     )
     x = K.expand_dims(x, axis=-1)  # restore axis
