@@ -35,12 +35,11 @@ def do_training(model, X_train, X_val, y_train, y_val, batch_size, n_epochs, com
     )  # history
 
 
-def do_inference(model, weights_file, X, batch_size, verbose):
-    model.load_weights(weights_file)
+def do_inference(model, X, batch_size, verbose):
     return model.predict(X, verbose=verbose, batch_size=batch_size)
 
 
-def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
+def do_evaluation(model, X_test, y_test, batch_size, verbose):
     metrics = [
         {
             'name': 'batch_metric-mean_IoU',
@@ -54,7 +53,6 @@ def do_evaluation(model, weights_file, X_test, y_test, batch_size, verbose):
 
     preds = do_inference(
         model,
-        weights_file,
         X_test,
         batch_size,
         verbose

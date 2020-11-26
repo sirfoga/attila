@@ -115,11 +115,10 @@ def do_experiment(experiment, data, config, out_folder):
         callbacks,
         verbose
     )
-    model.save(weights_file)
+    # todo this causes a lot of stucks model.save(weights_file)
 
     stats, preds = do_evaluation(
         model,
-        weights_file,
         X_test,
         y_test,
         config.getint('training', 'batch size'),
