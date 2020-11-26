@@ -9,3 +9,6 @@ cleanh5::
 
 r-update::
 	git reset --hard origin/main && git pull
+
+get-out::
+	scp -r stfo194b@taurus.hrsk.tu-dresden.de:/home/stfo194b/martin/attila/out .

@@ -75,14 +75,12 @@ def plot_history(history, last=None, out_folder=None):
 
     def _plot_results(results, ax):
         _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.02], find_min=True)
-        ax.legend()
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
         _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.5, 1], find_max=True)
         _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.5, 1], find_max=True)
 
-        ax.legend()
 
     results = {
         k: history[k][-last:]
