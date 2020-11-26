@@ -51,12 +51,12 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     return ix
 
 
-def plot_history(experiments, last=None, out_folder=None):
+def plot_history(history, last=None, out_folder=None):
     if last is None:
         last = 0
 
     n_cols = 2
-    n_rows = int(np.ceil(len(experiments) / n_cols))
+    n_rows = int(1)
     fig, ax = get_figa(n_rows, n_cols)
 
     def _plot_key(ax, key, results, color, scale=None, find_min=False, find_max=False):
@@ -75,27 +75,23 @@ def plot_history(experiments, last=None, out_folder=None):
         if find_max:
             ax.plot(np.argmax(validation), np.max(validation), marker='x', color='r')
 
-    def _plot_results(results, ax, title):
+    def _plot_results(results, ax):
         _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.02], find_min=True)
-        # ax.legend() 
+        ax.legend()
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
         _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.5, 1], find_max=True)
         _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.5, 1], find_max=True)
 
-        # ax.legend()
+        ax.legend()
 
-        ax.set_title(title)
+    results = {
+        k: history[k][-last:]
+        for k in history.keys()
+    }
 
-    for a, experiment in zip(ax.ravel(), experiments):
-        history = experiment['history']
-        results = {
-            k: history[k][-last:]
-            for k in history.keys()
-        }
-
-        _plot_results(results, a, experiment['name'])
+    _plot_results(results, ax)
 
     if out_folder:
         fig.savefig(out_folder / 'history.png')

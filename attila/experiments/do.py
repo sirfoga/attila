@@ -136,21 +136,29 @@ def do_experiment(experiment, data, config, out_folder):
         is_verbose('experiments', config)
     )
 
+    model_out_folder = get_model_output_folder(out_folder, experiment['name'])
     plot_preds(
         X_test,
         y_test,
         preds,
         cmap=config.get('image', 'cmap'),
         title='model: {}'.format(experiment['name']),
-        out_folder=get_model_output_folder(out_folder, experiment['name'])
+        out_folder=model_out_folder
     )
 
     summary = {
         'history': results.history,
         'stats': stats
     }
-    out_f = get_model_output_folder(out_folder, experiment['name']) / 'summary.json'
+    out_f = model_out_folder / 'summary.json'
     save_experiment(summary, out_f)
+
+    last_epochs = int(config.getint('training', 'epochs') * 0.8)
+    plot_history(
+        summary['history'],
+        last=last_epochs,
+        out_folder=model_out_folder
+    )
 
     return summary
 
@@ -166,9 +174,6 @@ def do_experiments(experiments, data, config, out_folder):
         summary = do_experiment(experiment, data, config, out_folder)
         experiments[i]['history'] = summary['history']
         experiments[i]['stats'] = summary['stats']
-
-    last_epochs = int(config.getint('training', 'epochs') * 0.8)
-    plot_history(experiments, last=last_epochs, out_folder=out_folder)
 
     return experiments
 
