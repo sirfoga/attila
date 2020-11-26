@@ -24,7 +24,7 @@ def get_foreground(x):
     fore = x[..., 1]
     borders = x[..., 2]
 
-    return K.sum(fore, borders)
+    return fore + borders
 
 
 def eps_divide(n, d, eps=K.epsilon()):

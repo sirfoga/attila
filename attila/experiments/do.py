@@ -106,7 +106,6 @@ def do_experiment(experiment, data, config, out_folder):
         describe(X_train, X_val, X_test, y_train, y_val, y_test)
 
     model, compile_args = get_model(experiment, config)
-    weights_file = str(get_weights_file(out_folder, experiment['name']))
     verbose = is_verbose('experiments', config)
     callbacks = [
         EarlyStopping(patience=10, verbose=verbose),
@@ -125,7 +124,9 @@ def do_experiment(experiment, data, config, out_folder):
         callbacks,
         verbose
     )
-    # todo model.save(weights_file)
+
+    weights_file = str(get_weights_file(out_folder, experiment['name']))
+    model.save(weights_file)
 
     stats, preds = do_evaluation(
         model,
