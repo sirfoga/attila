@@ -72,7 +72,7 @@ def DSC(y_true, y_pred, smooth=1.0):
     return eps_divide(2.0 * tp, tp + tp_fp_fn, eps=smooth)
 
 
-def mean_DSC(y_true, y_pred, smooth=1.0):
+def mean_DSC(y_true, y_pred):
     scores = metric_per_channel(y_true, y_pred, DSC)
     scores = K.cast(scores, dtype='float32')
     return K.mean(scores)
