@@ -59,7 +59,8 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
         current_n_filters = n_filters
 
         if padding == 'valid':
-            crop_size = 4
+            conv_size = kernel_shape[0]
+            crop_size = conv_inner_layers * (conv_size - 1)
             crop_size = int(crop_size / 2)  # side by side
             x = Cropping2D(crop_size)(x)
 
