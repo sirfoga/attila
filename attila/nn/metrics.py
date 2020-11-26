@@ -14,7 +14,7 @@ def do_threshold(x, threshold=0.5):
 def get_binary_img(x, threshold=0.5):
     x = K.sum(
         x[..., 1] + x[..., 2],  # foreground + borders
-        axis=3
+        axis=2
     )
     x = K.expand_dims(x, axis=-1)  # restore axis
     x = K.cast(K.greater(x, threshold), dtype='float32')
@@ -36,8 +36,8 @@ def mean_IoU(threshold=0.5):
         y_pred = get_binary_img(y_pred)
         y_true = get_binary_img(y_true)
 
-        inter = K.sum(K.sum(K.squeeze(y_true * y_pred, axis=3), axis=2), axis=1)
-        union = K.sum(K.sum(K.squeeze(y_true + y_pred, axis=3), axis=2), axis=1) - inter
+        inter = K.sum(K.squeeze(y_true * y_pred, axis=2), axis=1)
+        union = K.sum(K.squeeze(y_true + y_pred, axis=2), axis=1) - inter
         
         return K.mean((inter + K.epsilon()) / (union + K.epsilon()))
 
@@ -55,8 +55,8 @@ def DSC(smooth=1.0, threshold=0.5):
         y_pred = get_binary_img(y_pred)
         y_true = get_binary_img(y_true)
 
-        inter = K.sum(K.sum(K.squeeze(y_true * y_pred, axis=3), axis=2), axis=1)
-        union = K.sum(K.sum(K.squeeze(y_true + y_pred, axis=3), axis=2), axis=1)
+        inter = K.sum(K.squeeze(y_true * y_pred, axis=2), axis=1)
+        union = K.sum(K.squeeze(y_true + y_pred, axis=2), axis=1)
 
         return K.mean((2.0 * inter + K.epsilon()) / (union + K.epsilon()))
 
