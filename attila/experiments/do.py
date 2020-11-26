@@ -100,8 +100,7 @@ def do_experiment(experiment, data, config, out_folder):
     verbose = is_verbose('experiments', config)
     callbacks = [
         EarlyStopping(patience=10, verbose=verbose),
-        ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose),
-        ModelCheckpoint(weights_file, monitor='loss', verbose=verbose, save_best_only=True, save_weights_only=True)
+        ReduceLROnPlateau(factor=1e-1, patience=3, min_lr=1e-5, verbose=verbose)
     ]
 
     results = do_training(
@@ -116,6 +115,7 @@ def do_experiment(experiment, data, config, out_folder):
         callbacks,
         verbose
     )
+    model.save(weights_file)
 
     stats, preds = do_evaluation(
         model,
