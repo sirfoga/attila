@@ -101,7 +101,7 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
     return _f
 
 
-def expanding_path(n_filters, skip_conns, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm):
+def expanding_path(n_filters, skip_conns, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers, filter_mult):
     def _f(x):
         current_n_filters = n_filters
 
@@ -143,7 +143,8 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
             use_se_block,
             dropout,
             batchnorm,
-            conv_inner_layers
+            conv_inner_layers,
+            filter_mult
         )(x)
         
         x = middle_block(
@@ -151,7 +152,8 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
             padding,
             dropout,
             batchnorm,
-            conv_inner_layers
+            conv_inner_layers,
+            filter_mult
         )(x)
 
         if use_skip_conn:
@@ -168,7 +170,8 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
             use_se_block,
             dropout,
             batchnorm,
-            conv_inner_layers
+            conv_inner_layers,
+            filter_mult
         )(x)
 
         x = final_path(n_classes, final_activation, padding, use_se_block)(x)
