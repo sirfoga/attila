@@ -1,12 +1,12 @@
 import numpy as np
 from tensorflow.keras import backend as K
 
-from attila.experiments.data import load_stuff
 from attila.experiments.do import get_model
-from attila.util.config import is_verbose
+
+from attila.util.io import append_rows2text, load_pickle
 
 
-def create_tex_table_configurations(experiments, config):
+def config2tex(experiments, config):
     row_table_f = '{} & {} & {} & {} & {} & {} \\\\'
 
     print('creating .tex table for {} experiments configurations'.format(len(experiments)))
@@ -30,7 +30,7 @@ def create_tex_table_configurations(experiments, config):
     return rows
 
 
-def create_tex_table_results(experiments):
+def results2tex(experiments):
     row_table_f = '{} & {} & {} \\\\'
     metric_keys = ['batch_metric-mean_IoU', 'batch_metric-DSC']
 
@@ -73,7 +73,7 @@ def create_tex_table_results(experiments):
     return rows, out
 
 
-def create_tex_table_runs_results(runs):
+def runs2tex(runs):
     row_table_f = '{} & {} & {} \\\\'
     metric_keys = list(list(runs[0].values())[0].keys())  # keys of all models
     model_names = list(runs[0].keys())
@@ -117,54 +117,44 @@ def create_tex_table_runs_results(runs):
     return rows, out
 
 
-def write2(stuff, out_file):
-    with open(out_file, 'w') as w:
-        w.write(stuff)
+def run2tex(summary_file, config, out_file):
+    results = load_pickle(summary_file)
+
+    # rows = config2tex(results, config)
+    # if out_file:
+    #     append_rows2text(rows, out_file)
+    # else:
+    #     print(rows)
+
+    rows, run_results = results2tex(results)
+    if out_file:
+        append_rows2text(rows, out_file)
+    else:
+        print(rows)
+
+    return run_results
 
 
-def append2(stuff, out_file):
-    with open(out_file, 'a') as w:
-        w.write('\n')
-        w.write(stuff)
-
-
-def append_rows2(rows, out_file):
-    stuff = '\n'.join(rows)
-    stuff = '\n' + stuff + '\n'
-    append2(stuff, out_file)
-
-
-def create_tex_experiments(config, out_folder, out_file=None):
+def out2tex(config, out_folder, out_file=None):
     nruns = config.getint('experiments', 'nruns')
     all_runs = []
-    if out_file:
-        write2('', out_file)
 
     for nrun in range(nruns):
         folder = out_folder / 'run-{}'.format(nrun)
-        results_file = folder / config.get('experiments', 'output file')
-        results = load_stuff(results_file)
+        summary_file = folder / config.get('experiments', 'output file')
 
-        if is_verbose('experiments', config):
-            print('=== run #{}: loaded {} results from {}'.format(nrun + 1, len(results), results_file))
-
-        rows = create_tex_table_configurations(results, config)
         if out_file:
-            append_rows2(rows, out_file)
+            _out_file = folder / config.get('experiments', 'output tables')
         else:
-            print(rows)
-
-        rows, run_results = create_tex_table_results(results)
-        if out_file:
-            append_rows2(rows, out_file)
-        else:
-            print(rows)
-
+            _out_file = None
+        
+        run_results = run2tex(summary_file, config, _out_file)
+        
         all_runs.append(run_results)
 
     print('=== all runs')
-    rows, _ = create_tex_table_runs_results(all_runs)
+    rows, _ = runs2tex(all_runs)
     if out_file:
-        append_rows2(rows, out_file)
+        append_rows2text(rows, out_file)
     else:
         print(rows)

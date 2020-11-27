@@ -1,7 +1,9 @@
+h5py==2.10.0
 keras
 tensorflow
 scikit-learn
 configparser
 matplotlib
-numpy
 tikzplotlib
+scikit-image
+scikit-learn

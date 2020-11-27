@@ -1,9 +1,17 @@
 cwd				:= $(shell pwd)
-clean::
-	rm -rf out/
+out_folder		:= ./out
 
-cleanh5::
-	for f in $$(find . -name "*.h5"); do rm $${f}; done
+clean::
+	rm -rf ${out_folder}
+
+cleanH5::
+	for f in $$(find ${out_folder} -name "*.h5"); do rm $${f}; done
+
+cleanJson::
+	for f in $$(find ${out_folder} -name "*.json"); do rm $${f}; done
+
+cleanTex::
+	for f in $$(find ${out_folder} -name "*.tex"); do rm $${f}; done
 
 r-update::
 	git reset --hard origin/main && git pull
