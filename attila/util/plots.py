@@ -17,7 +17,8 @@ def get_figa(n_rows, n_cols):
 
 def get_mask(masks, ix):
     foreground = masks[ix, ..., 0]
-    borders = masks[ix, ..., 1]
+    # testingborders = masks[ix, ..., 1]
+    borders = np.zeros(masks[ix, ..., 0].shape)
 
     return foreground, borders
 

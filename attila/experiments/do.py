@@ -98,6 +98,8 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
         y_val = _crop_data(img_out_shape)(y_val)
         y_test = _crop_data(img_out_shape)(y_test)
 
+        # todo DO crop X here
+
         return (X_train, X_val, X_test, y_train, y_val, y_test)
 
 

@@ -7,17 +7,17 @@ def eps_divide(n, d, eps=K.epsilon()):
     return (n + eps) / (d + eps)
 
 
-def do_threshold(x, threshold=0.5):
+def cast_threshold(x, threshold=0.5):
     return K.cast(K.greater(x, threshold), dtype='float32')
 
 
 def get_binary_img(x, threshold=0.5):
-    x = K.sum(
-        x[..., 0] + x[..., 1],  # foreground + borders
-        axis=-1
-    )
-    x = K.expand_dims(x, axis=-1)  # restore axis
-    x = K.cast(K.greater(x, threshold), dtype='float32')
+    # testingx = K.sum(
+    # testing    x[..., 0] + x[..., 1],  # foreground + borders
+    # testing    axis=-1
+    # testing)
+    # testingx = K.expand_dims(x, axis=-1)  # restore axis
+    x = cast_threshold(x)
     return x
 
 

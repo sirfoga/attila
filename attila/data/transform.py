@@ -80,7 +80,7 @@ def img2channels():
 
         out = np.append(add_dim()(foreground), add_dim()(borders), axis=2)
 
-        return out
+        return foreground  # testing 1 channel out
 
     return _f
 
