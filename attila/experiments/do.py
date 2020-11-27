@@ -1,5 +1,5 @@
 import random
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 from sklearn.model_selection import train_test_split
 
@@ -109,7 +109,6 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
 
     model, compile_args = get_model(experiment, config)
     verbose = is_verbose('experiments', config)
-    weights_file = str(get_weights_file(out_folder, experiment['name']))
     callbacks = [
         EarlyStopping(patience=10, verbose=verbose),
         ReduceLROnPlateau(
@@ -117,14 +116,7 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
             patience=3,
             min_lr=1e-5,
             verbose=verbose
-        ),
-        # todo ModelCheckpoint(
-        #     weights_file,
-        #     monitor='loss',
-        #     verbose=verbose,
-        #     save_best_only=True,
-        #     save_weights_only=True
-        # )
+        )
     ]
 
     results = do_training(
@@ -141,7 +133,6 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
     )
 
     # todo save model
-    # model.load_weights(weights_file)  # loads best model
 
     stats, preds = do_evaluation(
         model,

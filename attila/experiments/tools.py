@@ -37,9 +37,9 @@ def results2tex(experiments):
     print('creating .tex table for {} experiments results'.format(len(experiments)))
 
     for experiment in experiments:
-        results = experiment['stats']
+        results = experiment['stats']  # evaluation statistics
         for key in metric_keys:  # save for later processing
-            experiment[key] = np.mean(results[key])
+            experiment[key] = np.mean(results[key])  # mean of evaluation
 
     best_values = {
         key: np.max([
