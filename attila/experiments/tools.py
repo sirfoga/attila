@@ -133,28 +133,3 @@ def run2tex(summary_file, config, out_file):
         print(rows)
 
     return run_results
-
-
-def out2tex(config, out_folder, out_file=None):
-    nruns = config.getint('experiments', 'nruns')
-    all_runs = []
-
-    for nrun in range(nruns):
-        folder = out_folder / 'run-{}'.format(nrun)
-        summary_file = folder / config.get('experiments', 'output file')
-
-        if out_file:
-            _out_file = folder / config.get('experiments', 'output tables')
-        else:
-            _out_file = None
-        
-        run_results = run2tex(summary_file, config, _out_file)
-        
-        all_runs.append(run_results)
-
-    print('=== all runs')
-    rows, _ = runs2tex(all_runs)
-    if out_file:
-        append_rows2text(rows, out_file)
-    else:
-        print(rows)

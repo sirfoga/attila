@@ -3,7 +3,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCh
 
 from sklearn.model_selection import train_test_split
 
-from attila.util.plots import plot_preds, plot_history, plot_sample
+from attila.util.plots import plot_preds, plot_sample
 
 from attila.nn.models.unet import calc_out_size, build as build_model
 from attila.nn.core import do_training, do_evaluation
@@ -118,13 +118,13 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
             min_lr=1e-5,
             verbose=verbose
         ),
-        ModelCheckpoint(
-            weights_file,
-            monitor='loss',
-            verbose=verbose,
-            save_best_only=True,
-            save_weights_only=True
-            )
+        # todo ModelCheckpoint(
+        #     weights_file,
+        #     monitor='loss',
+        #     verbose=verbose,
+        #     save_best_only=True,
+        #     save_weights_only=True
+        # )
     ]
 
     results = do_training(
@@ -140,7 +140,9 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
         verbose
     )
 
-    model.load_weights(weights_file)  # loads best model
+    # todo save model
+    # model.load_weights(weights_file)  # loads best model
+
     stats, preds = do_evaluation(
         model,
         X_test,
@@ -158,7 +160,7 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
         cmap=config.get('image', 'cmap'),
         title='model: {}'.format(experiment['name']),
         out_folder=model_out_folder
-    )
+    )  # todo NOT do here (see `do_report`)
 
     summary = {
         'history': results.history,
@@ -166,13 +168,6 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
     }
     out_f = model_out_folder / config.get('experiments', 'output file')
     stuff2pickle(summary, out_f)
-
-    last_epochs = int(config.getint('training', 'epochs') * 0.8)
-    plot_history(
-        summary['history'],
-        last=last_epochs,
-        out_folder=model_out_folder
-    )
 
     return summary
 
@@ -233,7 +228,7 @@ def do_batch_experiments(experiments, data, config, out_folder):
                 print('augmented training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
 
         plot_sample(X_train, y_train, out_folder=folder)
-        
+
         data = (X_train, X_val, X_test, y_train, y_val, y_test)
         results = do_experiments(
             experiments,

@@ -61,7 +61,13 @@ def plot_history(history, last=None, out_folder=None):
         validation = results['val_{}'.format(key)]
 
         if scale:
-            ax.set_ylim(scale)
+            p_min, p_max = np.percentile(training + validation, [50, 100])
+
+            fixed_scale = [
+                min(p_min, scale[0]),
+                max(p_max, scale[1])
+            ]
+            ax.set_ylim(fixed_scale)
 
         ax.plot(training, label='training {}'.format(key), color=color)
         ax.plot(validation, '--', label='validation {}'.format(key), color=color)
@@ -73,12 +79,12 @@ def plot_history(history, last=None, out_folder=None):
             ax.plot(np.argmax(validation), np.max(validation), marker='x', color='r')
 
     def _plot_results(results, ax):
-        _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.04], find_min=True)
+        _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.02], find_min=True)
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
-        _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.85, 1], find_max=True)
-        _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.85, 1], find_max=True)
+        _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.95, 1], find_max=True)
+        _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.95, 1], find_max=True)
 
 
     results = {
