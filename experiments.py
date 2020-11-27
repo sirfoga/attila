@@ -2,7 +2,7 @@ from pathlib import Path
 
 from attila.data.parse import parse_data, get_data
 from attila.util.config import get_config
-from attila.experiments.data import load_experiments
+from attila.experiments.data import load_stuff
 from attila.experiments.do import do_batch_experiments
 from attila.experiments.tools import create_tex_experiments
 
@@ -50,7 +50,7 @@ def main():
     )
 
     experiments_file = _here / 'experiments.json'
-    experiments = load_experiments(experiments_file)
+    experiments = load_stuff(experiments_file)
 
     do_batch_experiments(experiments, (X, y), config, out_path)
     create_tex_experiments(config, out_path, out_path / 'tables.tex')

@@ -15,7 +15,7 @@ from attila.data.augment import do_augmentations, flip, flop
 
 from attila.util.config import is_verbose
 
-from attila.experiments.data import save_experiments, save_experiment
+from attila.experiments.data import save_stuff
 
 
 def get_experiments(options):
@@ -165,8 +165,8 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
         'history': results.history,
         'stats': stats
     }
-    out_f = model_out_folder / 'summary.json'
-    save_experiment(summary, out_f)
+    out_f = model_out_folder / config.get('experiments', 'output file')
+    save_stuff(summary, out_f)
 
     last_epochs = int(config.getint('training', 'epochs') * 0.8)
     plot_history(
@@ -244,7 +244,7 @@ def do_batch_experiments(experiments, data, config, out_folder):
             plot_ids=plot_ids
         )
         out_f = folder / config.get('experiments', 'output file')
-        save_experiments(results, out_f)
+        save_stuff(results, out_f)
 
         if is_verbose('experiments', config):
             print('done! output folder is {}'.format(folder))

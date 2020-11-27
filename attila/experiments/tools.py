@@ -1,7 +1,7 @@
 import numpy as np
 from tensorflow.keras import backend as K
 
-from attila.experiments.data import load_experiments
+from attila.experiments.data import load_stuff
 from attila.experiments.do import get_model
 from attila.util.config import is_verbose
 
@@ -143,7 +143,7 @@ def create_tex_experiments(config, out_folder, out_file=None):
     for nrun in range(nruns):
         folder = out_folder / 'run-{}'.format(nrun)
         results_file = folder / config.get('experiments', 'output file')
-        results = load_experiments(results_file)
+        results = load_stuff(results_file)
 
         if is_verbose('experiments', config):
             print('=== run #{}: loaded {} results from {}'.format(nrun + 1, len(results), results_file))
