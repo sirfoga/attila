@@ -17,47 +17,51 @@ def describe_model(model):
     print('= # non-trainable params: {}'.format(non_trainable_params))
 
 
-def do_training(model, X_train, X_val, y_train, y_val, batch_size, n_epochs, compile_args, callbacks, verbose):
-    if verbose:
-        describe_model(model)
+def do_training(model, datagen, steps_per_epoch, n_epochs, compile_args, callbacks):
+    describe_model(model)  # todo only if verbose
 
     model.compile(**compile_args)
-    return model.fit(
-        X_train,
-        y_train,
-        batch_size=batch_size,
-        validation_batch_size=batch_size,
-        epochs=n_epochs,
-        callbacks=callbacks,
-        validation_data=(X_val, y_val),
-        workers=1,
-        use_multiprocessing=False,
-    )  # history
+    return None
+    # return model.fit(
+    #     datagen,
+    #     steps_per_epoch=steps_per_epoch
+    #     epochs=n_epochs,
+    #     callbacks=callbacks,
+    #     # workers=1,  # todo fix taurus writing
+    #     # use_multiprocessing=False,
+    # )  # history
 
 
-def do_inference(model, X, batch_size, verbose):
-    return model.predict(
-        X,
-        verbose=1 if verbose else 0,
-        batch_size=batch_size
+def do_inference(model, data, verbose):
+    (datagen, X_test) = data
+    gen = datagen.flow(
+        X_test,
+        shuffle=False,
+        batch_size=1  # 1 img at a time
+    )
+
+    return model.predict_generator(
+        gen,
+        verbose=1 if verbose else 0
     )
 
 
-def do_evaluation(model, X_test, y_test, batch_size, verbose):
+def do_evaluation(model, data, verbose):
+    (datagen, X_test, y_test) = data
     metrics = [
         {
-            'name': 'batch_metric-mean_IoU',
+            'name': 'attila_metrics_mean_IoU',
             'callback': mean_IoU()
         },
         {
-            'name': 'batch_metric-DSC',
+            'name': 'attila_metrics_DSC',
             'callback': DSC()
         }
     ]
 
     preds = do_inference(
         model,
-        X_test,
+        (datagen, X_test),
         batch_size,
         verbose
     )
@@ -66,6 +70,14 @@ def do_evaluation(model, X_test, y_test, batch_size, verbose):
         metric['name']: []
         for metric in metrics
     }
+
+    gen = datagen.flow(
+        y_test,
+        shuffle=False,
+        batch_size=1  # 1 img at a time
+    )
+
+    # breakpoint
 
     for ix in range(len(X_test)):
         for metric in metrics:

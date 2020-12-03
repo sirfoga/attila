@@ -45,7 +45,7 @@ def parse_data(raw, img_shape):
         np.array,  # just in case parser did not np.array-ed
         rm_percentiles_transformation(2, 98),  # threshold outliers
         crop_center_transformation(img_shape),
-        normalize_transformation((0, 1)),  # pixel values in [0, 1]
+        normalize_transformation((0, 255)),
     ]
 
     X = do_transformations(

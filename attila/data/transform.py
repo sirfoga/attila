@@ -16,7 +16,7 @@ def normalize_transformation(feature_range):
 
 
 def crop_center_transformation(shape):
-    height, width, *_ = shape  # 3rd dim not needed
+    (height, width) = shape
 
     def get_start_point(dim, cropping):
         return dim // 2 - cropping // 2
@@ -25,10 +25,25 @@ def crop_center_transformation(shape):
         return start + cropping
 
     def _f(img):
-        y, x, *_ = img.shape  # n channels not wanted
+        n_dim = len(img.shape)
+
+        if n_dim == 2:
+            (y, x) = img.shape
+        elif n_dim == 3:
+            (y, x, _) = img.shape  # n channels not wanted
+        else:  # assuming tensor (n_dim = 4)
+            (_, y, x, _) = img.shape  # batch size AND n channels not wanted
+        
         (start_x, start_y) = (get_start_point(x, width), get_start_point(y, height))
         (end_x, end_y) = (get_end_point(start_x, width), get_end_point(start_y, height))
-        return img[start_y: end_y, start_x: end_x, ...]
+        
+        
+        if n_dim == 2:
+            return img[start_y: end_y, start_x: end_x]
+        elif n_dim == 3:
+            return img[start_y: end_y, start_x: end_x, :]
+        else:  # assuming tensor (n_dim = 4)
+            return img[:, start_y: end_y, start_x: end_x, :]
 
     return _f
 

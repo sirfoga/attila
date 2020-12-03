@@ -36,7 +36,7 @@ def mean_IoU(threshold=0.5):
         
         return (inter + K.epsilon()) / (union + K.epsilon())
 
-    _f.__name__ = 'batch_metric-{}'.format('mean_IoU')
+    _f.__name__ = 'attila_metrics_{}'.format('mean_IoU')
     return _f
 
 
@@ -55,6 +55,6 @@ def DSC(smooth=1.0, threshold=0.5):
 
         return (2.0 * inter + K.epsilon()) / (union + K.epsilon())
 
-    _f.__name__ = 'batch_metric-{}'.format('DSC')
+    _f.__name__ = 'attila_metrics_{}'.format('DSC')
 
     return _f

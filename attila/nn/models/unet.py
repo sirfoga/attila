@@ -18,8 +18,8 @@ def calc_crop_size(layer, conv_layers, conv_size, padding):
     return 0
 
 
-def calc_out_size(n_layers, conv_layers, conv_size, pool_size, padding):
-    """ calculate output size in a U-Net """
+def calc_img_shapes(n_layers, conv_layers, conv_size, pool_size, padding, adjust=True):
+    """ calculate input/output size in a U-Net """
 
     conv_crop = conv_layers * (conv_size - 1)
 
@@ -29,11 +29,38 @@ def calc_out_size(n_layers, conv_layers, conv_size, pool_size, padding):
     def _f(x):
         crop_size = calc_crop_size(n_layers, conv_layers, conv_size, padding)
 
+        inp_shape = x
+        out_shape = x
+
+        if adjust:
+            inp_shape = _sub_tup(inp_shape, conv_crop)  # todo very hacky
+            inp_shape = tuple(int(x) for x in inp_shape)
+
+            out_shape = _sub_tup(out_shape, conv_crop)
+
         if padding == 'valid':
-            x = _sub_tup(x, conv_crop)  # adjust
-            x = _sub_tup(x, conv_crop)  # first
-            x = _sub_tup(x, crop_size)  # until last concatenation
-            x = _sub_tup(x, conv_crop)  # final
+            out_shape = _sub_tup(out_shape, conv_crop)  # first
+            out_shape = _sub_tup(out_shape, crop_size)  # until last concatenation
+            out_shape = _sub_tup(out_shape, conv_crop)  # final
+            out_shape = tuple(int(x) for x in out_shape)
+
+        return (inp_shape, out_shape)
+
+    return _f
+
+
+def calc_inp_size(n_layers, conv_layers, conv_size, pool_size, padding, adjust=True):
+    """ calculate output size in a U-Net """
+
+    conv_crop = conv_layers * (conv_size - 1)
+
+    def _f(x):
+        crop_size = calc_crop_size(n_layers, conv_layers, conv_size, padding)
+
+        if padding == 'valid':
+            if adjust:
+                x = _sub_tup(x, conv_crop)
+
             x = tuple(int(_x) for _x in x)
 
         return x

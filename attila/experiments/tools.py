@@ -32,7 +32,7 @@ def config2tex(experiments, config):
 
 def results2tex(experiments):
     row_table_f = '{} & {} & {} \\\\'
-    metric_keys = ['batch_metric-mean_IoU', 'batch_metric-DSC']
+    metric_keys = ['attila_metrics_mean_IoU', 'attila_metrics_DSC']
 
     print('creating .tex table for {} experiments results'.format(len(experiments)))
 

@@ -36,7 +36,7 @@ def make_tex(config, out_path):
     for nrun in range(nruns):
         folder = out_path / 'run-{}'.format(nrun)
         summary_file = folder / config.get('experiments', 'output file')
-        _out_file = folder / config.get('experiments', 'output tables')
+        _out_file = folder / config.get('experiments', 'output tables')  # todo use each model result file
 
         run_results = run2tex(summary_file, config, _out_file)
 

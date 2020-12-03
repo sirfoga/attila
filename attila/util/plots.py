@@ -91,8 +91,8 @@ def plot_history(history, last=None, out_folder=None):
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
-        _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.96, 1], find_max=True)
-        _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.96, 1], find_max=True)
+        _plot_key(ax, 'attila_metrics_mean_IoU', results, 'C0', scale=[0.96, 1], find_max=True)
+        _plot_key(ax, 'attila_metrics_DSC', results, 'C2', scale=[0.96, 1], find_max=True)
 
 
     results = {
@@ -107,7 +107,18 @@ def plot_history(history, last=None, out_folder=None):
         plt.close()
 
 
+def extract_preds(X, y, preds, ixs):
+    out = []
+
+    for ix in ixs:
+        out.append(
+            (X[ix, ..., 0], pred_foreground, ground_truth)
+        )
+
+    return out
+
 def plot_preds(X, y, preds, ixs, cmap, title=None, out_folder=None):
+    # todo use `extract_preds`
     for ix in ixs:
         plt.imshow(X[ix, ..., 0], cmap=cmap)
         if out_folder:
