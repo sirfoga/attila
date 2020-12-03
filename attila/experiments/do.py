@@ -34,7 +34,7 @@ def get_default_args(config):
         'kernel_size': config.getint('unet', 'conv size'),
         'pool_size': config.getint('unet', 'pool size'),
         'n_classes': config.getint('image', 'n classes'),
-        'final_activation': config.get('unet', 'final activation'),
+        'final_activation': config.get('unet', 'final activation'),  # todo try softmax
         'dropout': config.getfloat('unet', 'dropout'),
         'batchnorm': config.getboolean('unet', 'batchnorm'),
         'conv_inner_layers': config.getint('unet', 'n conv inner layers'),
@@ -107,7 +107,7 @@ def do_experiment(experiment, data, config, out_folder, plot_ids):
     if is_verbose('experiments', config):
         describe(X_train, X_val, X_test, y_train, y_val, y_test)
 
-    model, compile_args = get_model(experiment, config)
+    model, compile_args = get_model(experiment, config)  # todo continue traning ?
     verbose = is_verbose('experiments', config)
     callbacks = [
         EarlyStopping(patience=10, verbose=verbose),
@@ -203,7 +203,7 @@ def do_batch_experiments(experiments, data, config, out_folder):
 
         X_train, X_val, y_train, y_val = train_test_split(
             X_train_val, y_train_val, test_size=val_size
-        )  # different experiment different random seed
+        )  # different run different random seed
 
         if config.getboolean('data', 'aug'):
             X_train, y_train = do_augmentations(

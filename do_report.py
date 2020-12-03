@@ -50,7 +50,7 @@ def make_tex(config, out_path):
 def main():
     config, _, out_path, _ = get_env(_here)
 
-    make_tex(config, out_path)
+    # make_tex(config, out_path)
     make_history(config, out_path)
 
 

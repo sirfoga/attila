@@ -61,13 +61,21 @@ def plot_history(history, last=None, out_folder=None):
         validation = results['val_{}'.format(key)]
 
         if scale:
-            p_min, p_max = np.percentile(training + validation, [50, 100])
+            adjusted_scale = scale.copy()
 
-            fixed_scale = [
-                min(p_min, scale[0]),
-                max(p_max, scale[1])
-            ]
-            ax.set_ylim(fixed_scale)
+            if find_min:  # we're interested in the min => loss curve
+                p_min = np.percentile(training + validation, [10])
+
+                if p_min > adjusted_scale[1]:  # will not be seen
+                    adjusted_scale[1] = p_min
+
+            if find_max:  # we're interested in the max => metric curve
+                p_max = np.percentile(training + validation, [90])
+
+                if p_max < adjusted_scale[0]:  # will not be seen
+                    adjusted_scale[0] = p_max
+
+            ax.set_ylim(adjusted_scale)  # fixed_scale
 
         ax.plot(training, label='training {}'.format(key), color=color)
         ax.plot(validation, '--', label='validation {}'.format(key), color=color)
@@ -83,8 +91,8 @@ def plot_history(history, last=None, out_folder=None):
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
-        _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.95, 1], find_max=True)
-        _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.95, 1], find_max=True)
+        _plot_key(ax, 'batch_metric-mean_IoU', results, 'C0', scale=[0.96, 1], find_max=True)
+        _plot_key(ax, 'batch_metric-DSC', results, 'C2', scale=[0.96, 1], find_max=True)
 
 
     results = {
