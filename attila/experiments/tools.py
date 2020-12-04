@@ -51,7 +51,7 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
     model_names = list(runs[0].keys())
     across_runs, best_values = _get_across_runs(model_names, metric_keys, runs)
 
-    row_table_f = '{} & {} & {} & {} & {} & {} \\\\'
+    row_table_f = '{} & {} & {} & {} & {} \\\\'
     #                  skip?    padding    DSC
     #             name       SE?      IoU
 
@@ -66,7 +66,7 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
                 _2tex[key] = '{:.3f}'.format(results[key]['mean'])
 
             if results[key]['std'] >= 1e-4:  # there is a meaningful STD to show
-                _2tex[key] += ' \\pm {:.3f}'.format(results[key]['std'])
+                _2tex[key] += ' $\\pm$ {:.3f}'.format(results[key]['std'])
 
         experiment = [
             exp
@@ -75,10 +75,9 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
         ][0]  # find experiment config
 
         row_table = row_table_f.format(
-            model,
             '\\cmark{}' if experiment['use_skip_conn'] else '\\xmark{}',
             '\\cmark{}' if experiment['use_se_block'] else '\\xmark{}',
-            experiment['padding'],
+            '\\texttt{' + experiment['padding'] + '}',
             *(_2tex[key] for key in metric_keys)
         )
         rows.append(row_table)
