@@ -67,7 +67,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_ids):
+def do_experiment(experiment, data, split_seed, config, plot_ids):
     def _get_shapes(inp):
         img_inp_shape = inp.shape[1: 2 + 1]  # width, height of input images
         return calc_img_shapes(
@@ -146,9 +146,9 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
         (img_inp_shape, img_out_shape) = _get_shapes(X_train)
         return (
             crop_center_transformation(img_inp_shape)(X_train),
-            crop_center_transformation(img_out_shape)(y_train),
             crop_center_transformation(img_inp_shape)(X_test),
-            crop_center_transformation(img_out_shape)(y_test)
+            crop_center_transformation(img_out_shape)(y_test),
+            crop_center_transformation(img_out_shape)(y_train),
         )
 
 
@@ -173,7 +173,8 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
             augment=config.getboolean('data', 'aug'),
             phase='training'
         ),
-        steps_per_epoch,
+        len(X_train) // config.getint('training', 'batch size'),
+        len(X_test) // config.getint('training', 'batch size'),
         config.getint('training', 'epochs'),
         compile_args,
         callbacks
@@ -246,14 +247,10 @@ def do_batch_experiments(experiments, data, config, out_folder):
         if is_verbose('experiments', config):
             print('ready to perform #{} / {} batch of experiments'.format(nrun + 1, nruns))
 
-        n_train_samples = len(X_train) * (1 - config.getfloat('experiments', 'val size'))  # assuming no data augm
-        steps_per_epoch = n_train_samples / config.getint('training', 'batch size')  # let floor, will use not-used images next runs (most probably)
-
         do_experiments(
             experiments,
             (X_train, X_test, y_train, y_test),
             nrun,  # todo choose better seed
-            steps_per_epoch,
             config,
             folder,
             plot_ids=plot_ids
