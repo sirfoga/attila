@@ -111,27 +111,29 @@ def extract_preds(X, y, preds, ixs):
     out = []
 
     for ix in ixs:
+        ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
+        ground_truth = ground_truth_foreground + ground_truth_borders
+
+        pred_foreground, _ = get_mask(preds, ix)
+
         out.append(
-            (X[ix, ..., 0], pred_foreground, ground_truth)
+            (X[ix, ..., 0], ground_truth, pred_foreground)
         )
 
     return out
 
 def plot_preds(X, y, preds, ixs, cmap, title=None, out_folder=None):
     # todo use `extract_preds`
-    for ix in ixs:
-        plt.imshow(X[ix, ..., 0], cmap=cmap)
-        if out_folder:
-            plt.gcf().savefig(out_folder / 'input_{}.png'.format(ix))
-            plt.close()
+    # for ix in ixs:
+    #     plt.imshow(X[ix, ..., 0], cmap=cmap)
+    #     if out_folder:
+    #         plt.gcf().savefig(out_folder / 'input_{}.png'.format(ix))
+    #         plt.close()
 
-        ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
-        ground_truth = ground_truth_foreground + ground_truth_borders
 
-        pred_foreground, pred_borders = get_mask(preds, ix)
-
-        plt.imshow(pred_foreground, cmap='gray')
-        plt.contour(ground_truth, colors='red', levels=[0.5])
-        if out_folder:
-            plt.gcf().savefig(out_folder / 'pred_{}.png'.format(ix))
-            plt.close()
+    #     plt.imshow(pred_foreground, cmap='gray')
+    #     plt.contour(ground_truth, colors='red', levels=[0.5])
+    #     if out_folder:
+    #         plt.gcf().savefig(out_folder / 'pred_{}.png'.format(ix))
+    #         plt.close()
+    pass
