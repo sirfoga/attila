@@ -80,9 +80,7 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
         )(img_inp_shape)
 
 
-    def _get_datagen(X, y=None, augment=False, flowing=True):
-        (img_inp_shape, img_out_shape) = _get_shapes(X)
-
+    def _get_datagen(X=None, y=None, augment=False, phase='training'):
         gen_args = dict(  # todo try normalize ?
             featurewise_center=False,
             featurewise_std_normalization=False,
@@ -90,55 +88,71 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
             samplewise_std_normalization=False,
         )
 
-        
+        if phase == 'training':
+            if augment:
+                gen_args['horizontal_flip'] = True
+                gen_args['vertical_flip'] = True
+                # todo add more augmentations
 
-        if augment:
-            gen_args['horizontal_flip'] = True
-            gen_args['vertical_flip'] = True
-            # todo add more augmentations
-
-        gen = ImageDataGenerator(**gen_args)
-
-        if flowing:
             flowing_args = {  # todo use dict(
                 'batch_size': config.getint('training', 'batch size'),
                 'seed': split_seed,
                 'shuffle': True  # re-order samples each epoch
             }
 
-            if y is None:
-                pass
-            else:  # there is a y => we're training => create train/validate split
-                X_train, X_val, y_train, y_val = train_test_split(
-                    X, y, test_size=config.getfloat('experiments', 'val size')
-                )
+            # do the train/test split
+            X_train, X_val, y_train, y_val = train_test_split(
+                X, y,
+                test_size=config.getfloat('experiments', 'val size'),
+                random_state=split_seed
+            )
 
-                train_inp_gen = gen.flow(
-                    crop_center_transformation(img_inp_shape)(X_train),
-                    **flowing_args
-                )
-                train_out_gen = gen.flow(
-                    crop_center_transformation(img_out_shape)(y_train),
-                    **flowing_args
-                )
+            gen = ImageDataGenerator(**gen_args)
 
-                val_inp_gen = gen.flow(
-                    crop_center_transformation(img_inp_shape)(X_val),
-                    **flowing_args
-                )
-                val_out_gen = gen.flow(
-                    crop_center_transformation(img_out_shape)(y_val),
-                    **flowing_args
-                )
+            # create the training data generator (already flowing)
+            train_inp_gen = gen.flow(
+                X_train,
+                **flowing_args
+            )
+            train_out_gen = gen.flow(
+                y_train,
+                **flowing_args
+            )
 
-                return zip(train_inp_gen, train_out_gen), zip(val_inp_gen, val_out_gen)
+            # create the validation data generator (already flowing)
+            val_inp_gen = gen.flow(
+                X_val,
+                **flowing_args
+            )
+            val_out_gen = gen.flow(
+                y_val,
+                **flowing_args
+            )
 
-            return 
+            return zip(train_inp_gen, train_out_gen), zip(val_inp_gen, val_out_gen)
+        elif phase == 'evaluation':
+            gen = ImageDataGenerator(**gen_args)
+            flowing_args = dict(
+                shuffle=False,
+                batch_size=1  # 1 img at a time
+            )
+            return gen, flowing_args
 
-        return gen
+        return None
 
 
-    (X_train, X_test, y_train, y_test) = data
+    def _prepare_data(data):
+        (X_train, X_test, y_train, y_test) = data
+        (img_inp_shape, img_out_shape) = _get_shapes(X_train)
+        return (
+            crop_center_transformation(img_inp_shape)(X_train),
+            crop_center_transformation(img_out_shape)(y_train),
+            crop_center_transformation(img_inp_shape)(X_test),
+            crop_center_transformation(img_out_shape)(y_test)
+        )
+
+
+    (X_train, X_test, y_train, y_test) = _prepare_data(data)
     model, compile_args = get_model(experiment, config)
     verbose = is_verbose('experiments', config)
     callbacks = [
@@ -156,7 +170,8 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
         _get_datagen(
             X_train,
             y_train,
-            augment=config.getboolean('data', 'aug')
+            augment=config.getboolean('data', 'aug'),
+            phase='training'
         ),
         steps_per_epoch,
         config.getint('training', 'epochs'),
@@ -164,10 +179,13 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
         callbacks
     )
 
-    datagen = _get_datagen(X_test, augment=False, flowing=False)
+    (gen, flowing_args) = _get_datagen(
+        augment=False,
+        phase='evaluation'
+    )
     stats, preds = do_evaluation(
         model,
-        (datagen, X_test, y_test)
+        (gen, flowing_args, X_test, y_test)
     )
 
     preds = extract_preds(

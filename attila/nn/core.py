@@ -4,7 +4,8 @@ from tensorflow.keras import backend as K
 from attila.nn.metrics import mean_IoU, DSC
 
 
-def do_training(model, train_gen, valid_gen, steps_per_epoch, n_epochs, compile_args, callbacks):
+def do_training(model, data_gen, steps_per_epoch, n_epochs, compile_args, callbacks):
+    (train_gen, valid_gen) = data_gen
     model.compile(**compile_args)
     return model.fit(
         train_gen,
@@ -17,14 +18,7 @@ def do_training(model, train_gen, valid_gen, steps_per_epoch, n_epochs, compile_
     )  # history
 
 
-def do_inference(model, data, verbose=False):
-    (datagen, X_test) = data
-    gen = datagen.flow(
-        X_test,
-        shuffle=False,
-        batch_size=1  # 1 img at a time
-    )
-
+def do_inference(model, gen, verbose=False):
     return model.predict_generator(
         gen,
         verbose=1 if verbose else 0
@@ -32,7 +26,7 @@ def do_inference(model, data, verbose=False):
 
 
 def do_evaluation(model, data):
-    (datagen, X_test, y_test) = data
+    (gen, flowing_args, X_test, y_test) = data
     metrics = [
         {
             'name': 'attila_metrics_mean_IoU',
@@ -46,25 +40,18 @@ def do_evaluation(model, data):
 
     preds = do_inference(
         model,
-        (datagen, X_test)
+        gen.flow(X_test, **flowing_args)
     )
 
     stats = {
         metric['name']: []
         for metric in metrics
     }
-
-    gen = datagen.flow(
-        y_test,
-        shuffle=False,
-        batch_size=1  # 1 img at a time
-    )
-
-    for y, p in zip(gen, preds):
+    for y, p in zip(gen.flow(y_test, **flowing_args), preds):
         for metric in metrics:
             metric_f = metric['callback']
             metric_val = metric_f(
-                K.cast(y, dtype='float32'),  # breakpoint check type
+                K.cast(y, dtype='float32'),  # todo check type
                 K.cast(p, dtype='float32')
             ).numpy()
             stats[metric['name']].append(metric_val)
