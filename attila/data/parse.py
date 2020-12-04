@@ -45,17 +45,17 @@ def parse_data(raw, img_shape):
         np.array,  # just in case parser did not np.array-ed
         rm_percentiles_transformation(2, 98),  # threshold outliers
         crop_center_transformation(img_shape),
-        normalize_transformation((0, 255)),
+        normalize_transformation((0, 1)),
     ]
 
     X = do_transformations(
         X,
-        base_transformations + [add_dim()]  # todo split into channels
+        base_transformations + [add_dim()]
     )
 
     y = do_transformations(
         y,
-        base_transformations + [add_dim()]  # todo split into channels
+        base_transformations + [img2channels()]
     )
 
     return X, y

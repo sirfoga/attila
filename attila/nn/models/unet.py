@@ -149,13 +149,16 @@ def expanding_path(n_filters, skip_conns, kernel_shape, pool_shape, padding, use
 
 
 def final_path(n_classes, activation, padding, use_se_block):
+    n_dim = 2  # 2D images only
+    n_channel_out = n_classes - 1
+
     def _f(x):
         if use_se_block:
             x = se_block()(x)
 
         x = Conv2D(
-            n_classes,
-            (1, 1),
+            n_channel_out,
+            (1, ) * n_dim,
             padding=padding,
             activation=activation
         )(x)
