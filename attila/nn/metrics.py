@@ -12,9 +12,9 @@ def cast_threshold(x, threshold=0.5):
 
 
 def get_binary_img(x, threshold=0.5):
-    x = K.sum(
-        x,
-        axis=-1  # sum all channels (i.e foreground + borders)
+    x = K.sum(  # sum all channels
+        x[..., :-1],  # ... apart background (implicitely you also sum it, since it's a probability distribution)
+        axis=-1
     )
     x = K.expand_dims(x, axis=-1)  # restore axis
     x = cast_threshold(x)

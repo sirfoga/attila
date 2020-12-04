@@ -150,7 +150,7 @@ def expanding_path(n_filters, skip_conns, kernel_shape, pool_shape, padding, use
 
 def final_path(n_classes, activation, padding, use_se_block):
     n_dim = 2  # 2D images only
-    n_channel_out = n_classes - 1
+    n_channel_out = n_classes
 
     def _f(x):
         if use_se_block:
@@ -160,7 +160,7 @@ def final_path(n_classes, activation, padding, use_se_block):
             n_channel_out,
             (1, ) * n_dim,
             padding=padding,
-            activation=activation
+            activation='softmax'  # force a probability distribution
         )(x)
         return x
 
@@ -220,9 +220,6 @@ def build(n_filters, n_layers, kernel_size, pool_size, n_classes, final_activati
     n_dim = 2  # 2D images only
     kernel_shape = (kernel_size, ) * n_dim
     pool_shape = (pool_size, ) * n_dim
-
-    # input channels (1): grayscale
-    # output channels (3): background, foreground, borders
 
     n_channels = 1
     inp = Input((None, None, n_channels))

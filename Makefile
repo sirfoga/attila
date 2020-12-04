@@ -24,7 +24,7 @@ srun::
 	--partition=ml \
 	--nodes=1 \
 	--tasks=1 \
-	--cpus-per-task=4 \
+	--cpus-per-task=2 \
 	--gres=gpu:1 \
 	--mem-per-cpu=2583 \
 	--time=01:00:00 \

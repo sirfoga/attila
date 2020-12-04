@@ -18,6 +18,7 @@ def get_figa(n_rows, n_cols):
 def get_mask(masks, ix):
     foreground = masks[ix, ..., 0]
     borders = masks[ix, ..., 1]
+    # background = masks[ix, ..., -1]
 
     return foreground, borders
 

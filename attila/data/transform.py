@@ -74,6 +74,18 @@ def get_borders(img):
     return find_boundaries(img, mode='inner')
 
 
+def get_background(img, borders):
+    """ gets foreground of grayscale img """
+
+    out = img.copy()
+
+    out[out < 1] = 0.5  # background
+    out[out >= 1] = 0  # foreground + borders
+    out[out == 0.5] = 1
+
+    return out
+
+
 def get_foreground(img, borders):
     """ gets foreground of grayscale img """
 
@@ -90,16 +102,18 @@ def img2channels():
     """ splits grayscale 2d img -> channels: background, foreground, borders ..."""
 
     def _f(x):
+        background = get_background(x)
         borders = get_borders(x)
         foreground = get_foreground(x, borders)
 
         out = np.append(
             add_dim()(foreground),
             add_dim()(borders),
+            add_dim()(background),
             axis=-1
         )
 
-        return add_dim()(foreground)  # out
+        return out
 
     return _f
 
