@@ -74,7 +74,7 @@ def get_borders(img):
     return find_boundaries(img, mode='inner')
 
 
-def get_background(img, borders):
+def get_background(img):
     """ gets foreground of grayscale img """
 
     out = img.copy()
@@ -109,9 +109,9 @@ def img2channels():
         out = np.append(
             add_dim()(foreground),
             add_dim()(borders),
-            add_dim()(background),
             axis=-1
         )
+        out = np.append(out, add_dim()(background), axis=-1)
 
         return out
 
