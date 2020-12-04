@@ -147,8 +147,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
         return (
             crop_center_transformation(img_inp_shape)(X_train),
             crop_center_transformation(img_inp_shape)(X_test),
-            crop_center_transformation(img_out_shape)(y_test),
             crop_center_transformation(img_out_shape)(y_train),
+            crop_center_transformation(img_out_shape)(y_test),
         )
 
 
@@ -203,7 +203,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
     }
 
 
-def do_experiments(experiments, data, split_seed, steps_per_epoch, config, out_folder, plot_ids):
+def do_experiments(experiments, data, split_seed, config, out_folder, plot_ids):
     if is_verbose('experiments', config):
         print('ready to perform {} experiments'.format(len(experiments)))
 
@@ -215,7 +215,6 @@ def do_experiments(experiments, data, split_seed, steps_per_epoch, config, out_f
             experiment,
             data,
             split_seed,
-            steps_per_epoch,
             config,
             plot_ids
         )

@@ -58,19 +58,5 @@ def do_evaluation(model, data):
                 K.cast(p, dtype='float32')
             ).numpy()
             stats[metric['name']].append(metric_val)
-
-    if verbose:
-        print('=== evaluation stats')
-        print('= metrics on test set (size: {})'.format(len(X_test)))
-        f_out = '= {:>10} ~ mean {:.3f} median {:.3f} std {:.3f}'
-
-        for metric_name, metric_vals in stats.items():
-            metric_out = f_out.format(
-                metric_name,
-                np.mean(metric_vals),
-                np.median(metric_vals),
-                np.std(metric_vals)
-            )
-            print(metric_out)
-
+    
     return stats, preds
