@@ -50,16 +50,12 @@ def parse_data(raw, img_shape):
 
     X = do_transformations(
         X,
-        base_transformations + [add_dim()]
+        base_transformations + [add_dim()]  # todo split into channels
     )
 
     y = do_transformations(
         y,
-        base_transformations + [img2channels()]
+        base_transformations + [add_dim()]  # todo split into channels
     )
-
-    # todo assert
-    # - y has 2 channels (foreground and borders) and each one has > 10 "1" pixels
-    # - X has 1 channel
 
     return X, y

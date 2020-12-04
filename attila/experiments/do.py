@@ -34,7 +34,7 @@ def get_default_args(config):
         'kernel_size': config.getint('unet', 'conv size'),
         'pool_size': config.getint('unet', 'pool size'),
         'n_classes': config.getint('image', 'n classes'),
-        'final_activation': config.get('unet', 'final activation'),  # todo try softmax
+        'final_activation': config.get('unet', 'final activation'),
         'dropout': config.getfloat('unet', 'dropout'),
         'batchnorm': config.getboolean('unet', 'batchnorm'),
         'conv_inner_layers': config.getint('unet', 'n conv inner layers'),
