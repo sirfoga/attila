@@ -85,12 +85,6 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
         skip_conns = []
         current_n_filters = n_filters
 
-        if padding == 'valid':
-            conv_size = kernel_shape[0]
-            crop_size = conv_inner_layers * (conv_size - 1)
-            crop_size = int(crop_size / 2)  # side by side
-            x = Cropping2D(crop_size)(x)  # todo do NOT crop here
-
         for _ in range(n_layers):
             x, s = contracting_block(current_n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
             current_n_filters = int(current_n_filters * filter_mult)

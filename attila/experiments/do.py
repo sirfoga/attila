@@ -67,7 +67,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, split_seed, steps_per_epoch, config, out_folder, plot_ids):
+def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_ids):
     def _get_shapes(inp):
         img_inp_shape = inp.shape[1: 2 + 1]  # width, height of input images
         return calc_img_shapes(
@@ -89,6 +89,9 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, out_fol
             samplewise_center=False,
             samplewise_std_normalization=False,
         )
+
+        if y:  # if we're training
+            gen_args['validation_split'] = config.getfloat('experiments', 'val size')
 
         if augment:
             gen_args['horizontal_flip'] = True
@@ -151,7 +154,6 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, out_fol
         is_verbose('experiments', config)
     )
 
-    model_out_folder = get_model_output_folder(out_folder, experiment['name'])
     preds = extract_preds(
         X_test,
         y_test,
@@ -159,15 +161,11 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, out_fol
         plot_ids
     )
 
-    summary = {
+    return {
         'history': results.history,
         'stats': stats,
         'preds': preds
     }
-    out_f = model_out_folder / config.get('experiments', 'output file')
-    stuff2pickle(summary, out_f)
-
-    return summary
 
 
 def do_experiments(experiments, data, split_seed, steps_per_epoch, config, out_folder, plot_ids):
@@ -184,10 +182,12 @@ def do_experiments(experiments, data, split_seed, steps_per_epoch, config, out_f
             split_seed,
             steps_per_epoch,
             config,
-            out_folder,
             plot_ids
         )
-        # todo save summary, preds with `stuff2pickle`
+
+        model_out_folder = get_model_output_folder(out_folder, experiment['name'])
+        out_f = model_out_folder / config.get('experiments', 'output file')
+        stuff2pickle(summary, out_f)
 
 
 def do_batch_experiments(experiments, data, config, out_folder):
@@ -204,8 +204,6 @@ def do_batch_experiments(experiments, data, config, out_folder):
     if is_verbose('experiments', config):
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
-    val_size = config.getfloat('experiments', 'val size') / (1 - config.getfloat('experiments', 'val size'))
-
     for nrun in range(nruns):
         folder = out_folder / 'run-{}'.format(nrun)
         folder.mkdir(parents=True, exist_ok=True)
@@ -213,7 +211,7 @@ def do_batch_experiments(experiments, data, config, out_folder):
         if is_verbose('experiments', config):
             print('ready to perform #{} / {} batch of experiments'.format(nrun + 1, nruns))
 
-        n_train_samples = len(X_train) * (1 - val_size)  # assuming no data augm
+        n_train_samples = len(X_train) * (1 - config.getfloat('experiments', 'val size'))  # assuming no data augm
         steps_per_epoch = n_train_samples / config.getint('training', 'batch size')  # let floor, will use not-used images next runs (most probably)
 
         do_experiments(

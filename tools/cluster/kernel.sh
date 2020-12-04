@@ -7,7 +7,7 @@ srun \
 --mem-per-cpu=4096 \
 --time=00:30:00 \
 --account=p_ml_cv \
---pty zsh
+--pty bash
 
 source ./requirements.sh
 

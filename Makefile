@@ -29,7 +29,7 @@ srun::
 	--mem-per-cpu=2583 \
 	--time=02:00:00 \
 	--account=p_ml_cv \
-	--pty zsh
+	--pty bash
 
 hello::
 	@echo "hello ${USER} !"

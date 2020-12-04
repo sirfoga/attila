@@ -4,22 +4,7 @@ from tensorflow.keras import backend as K
 from attila.nn.metrics import mean_IoU, DSC
 
 
-def describe_model(model):
-    trainable_params = sum([np.prod(K.get_value(w).shape) for w in model.trainable_weights])
-    total_params = model.count_params()
-    non_trainable_params = total_params - trainable_params
-    n_layers = len(model.layers)
-
-    print('=== model')
-    print('= # layers: {}'.format(n_layers))
-    print('= # total params: {}'.format(total_params))
-    print('= # trainable params: {}'.format(trainable_params))
-    print('= # non-trainable params: {}'.format(non_trainable_params))
-
-
 def do_training(model, datagen, steps_per_epoch, n_epochs, compile_args, callbacks):
-    describe_model(model)  # todo only if verbose
-
     model.compile(**compile_args)
     return None
     # return model.fit(
@@ -32,7 +17,7 @@ def do_training(model, datagen, steps_per_epoch, n_epochs, compile_args, callbac
     # )  # history
 
 
-def do_inference(model, data, verbose):
+def do_inference(model, data, verbose=False):
     (datagen, X_test) = data
     gen = datagen.flow(
         X_test,
@@ -46,7 +31,7 @@ def do_inference(model, data, verbose):
     )
 
 
-def do_evaluation(model, data, verbose):
+def do_evaluation(model, data):
     (datagen, X_test, y_test) = data
     metrics = [
         {
@@ -62,8 +47,7 @@ def do_evaluation(model, data, verbose):
     preds = do_inference(
         model,
         (datagen, X_test),
-        batch_size,
-        verbose
+        batch_size
     )
 
     stats = {
@@ -77,14 +61,12 @@ def do_evaluation(model, data, verbose):
         batch_size=1  # 1 img at a time
     )
 
-    # breakpoint
-
-    for ix in range(len(X_test)):
+    for y, p in zip(gen, preds):
         for metric in metrics:
             metric_f = metric['callback']
             metric_val = metric_f(
-                K.cast(y_test[ix, ...], dtype='float32'),
-                K.cast(preds[ix, ...], dtype='float32')
+                K.cast(y, dtype='float32'),  # breakpoint check type
+                K.cast(p, dtype='float32')
             ).numpy()
             stats[metric['name']].append(metric_val)
 
