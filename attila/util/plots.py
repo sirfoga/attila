@@ -122,18 +122,19 @@ def extract_preds(X, y, preds, ixs):
 
     return out
 
-def plot_preds(X, y, preds, ixs, cmap, title=None, out_folder=None):
-    # todo use `extract_preds`
-    # for ix in ixs:
-    #     plt.imshow(X[ix, ..., 0], cmap=cmap)
-    #     if out_folder:
-    #         plt.gcf().savefig(out_folder / 'input_{}.png'.format(ix))
-    #         plt.close()
+def plot_preds(summary, cmap, out_folder=None):
+    for i, (X, y, pred) in enumerate(summary):
+        plt.imshow(X, cmap=cmap)
+        if out_folder:
+            plt.gcf().savefig(out_folder / 'input_{}.png'.format(i))
+            plt.close()
 
 
-    #     plt.imshow(pred_foreground, cmap='gray')
-    #     plt.contour(ground_truth, colors='red', levels=[0.5])
-    #     if out_folder:
-    #         plt.gcf().savefig(out_folder / 'pred_{}.png'.format(ix))
-    #         plt.close()
-    pass
+        plt.imshow(pred, cmap='gray')
+        plt.contour(y, colors='red', levels=[0.5])
+        if out_folder:
+            out_f = out_folder / 'pred_{}.png'.format(i)
+            plt.gcf().savefig(out_f)
+            plt.close()
+            print('pred img saved in {}'.format(out_f))
+

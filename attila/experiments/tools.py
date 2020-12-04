@@ -6,17 +6,16 @@ from attila.experiments.do import get_model
 from attila.util.io import append_rows2text, load_pickle
 
 
-def experiment2tex(summary, out_file, metric_keys=['attila_metrics_mean_IoU', 'attila_metrics_DSC']):
+def experiment2tex(summary, metric_keys=['attila_metrics_mean_IoU', 'attila_metrics_DSC']):
     out = {}
 
-    results = experiment['stats']  # evaluation statistics
+    results = summary['stats']  # evaluation statistics
     for key in metric_keys:
         out[key] = {
-            'mean': np.mean(results[key]),
-            'std': np.std(results[key])
+            'all': results[key],
         }
 
-    return out
+    return summary['name'], out
 
 
 def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attila_metrics_DSC']):
@@ -27,10 +26,10 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
             across_runs[model] = {}
 
             for key in metric_keys:
-                _vals = [
-                    run[model][key]['mean']
+                _vals = np.ravel([
+                    run[model][key]['all']
                     for run in runs
-                ]
+                ])
 
                 across_runs[model][key] = {
                     'mean': np.mean(_vals),
@@ -62,14 +61,18 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
 
         for key in metric_keys:
             if results[key]['mean'] >= best_values[key]:
-                _2tex[key] = '\\textbf{{{:.3f}}}'.format(results[key])
+                _2tex[key] = '\\textbf{{{:.3f}}}'.format(results[key]['mean'])
             else:
-                _2tex[key] = '{:.3f}'.format(results[key])
+                _2tex[key] = '{:.3f}'.format(results[key]['mean'])
 
-            _2tex[key] += ' \\pm ' + results[key]['std']
-            #           mean +- std
+            if results[key]['std'] >= 1e-4:  # there is a meaningful STD to show
+                _2tex[key] += ' \\pm {:.3f}'.format(results[key]['std'])
 
-        experiment = models_config[model]
+        experiment = [
+            exp
+            for exp in models_config
+            if exp['name'] == model
+        ][0]  # find experiment config
 
         row_table = row_table_f.format(
             model,
@@ -80,4 +83,4 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
         )
         rows.append(row_table)
 
-    return rows, out
+    return rows, across_runs
