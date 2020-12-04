@@ -9,7 +9,7 @@ _here = Path('.').resolve()
 
 
 def main():
-    config, data_path, out_path, models_config = get_env(_here)
+    config, data_path, out_path, models_config_path = get_env(_here)
     out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
 
     images_path = data_path / config.get('data', 'images')
@@ -21,8 +21,7 @@ def main():
         (config.getint('image', 'width'), config.getint('image', 'height'))
     )
 
-    models_config = load_json(models_config)
-
+    models_config = load_json(models_config_path)
     do_batch_experiments(models_config, (X, y), config, out_path)
 
 

@@ -90,8 +90,7 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
             samplewise_std_normalization=False,
         )
 
-        if y:  # if we're training
-            gen_args['validation_split'] = config.getfloat('experiments', 'val size')
+        
 
         if augment:
             gen_args['horizontal_flip'] = True
@@ -107,16 +106,34 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
                 'shuffle': True  # re-order samples each epoch
             }
 
-            inp_gen = gen.flow(
-                crop_center_transformation(imp_inp_shape)(X),
-                **flowing_args
-            )
-            out_gen = gen.flow(
-                crop_center_transformation(img_out_shape)(y),
-                **flowing_args
-            )
-            return zip(inp_gen, out_gen)
+            if y is None:
+                pass
+            else:  # there is a y => we're training => create train/validate split
+                X_train, X_val, y_train, y_val = train_test_split(
+                    X, y, test_size=config.getfloat('experiments', 'val size')
+                )
 
+                train_inp_gen = gen.flow(
+                    crop_center_transformation(img_inp_shape)(X_train),
+                    **flowing_args
+                )
+                train_out_gen = gen.flow(
+                    crop_center_transformation(img_out_shape)(y_train),
+                    **flowing_args
+                )
+
+                val_inp_gen = gen.flow(
+                    crop_center_transformation(img_inp_shape)(X_val),
+                    **flowing_args
+                )
+                val_out_gen = gen.flow(
+                    crop_center_transformation(img_out_shape)(y_val),
+                    **flowing_args
+                )
+
+                return zip(train_inp_gen, train_out_gen), zip(val_inp_gen, val_out_gen)
+
+            return 
 
         return gen
 
@@ -151,7 +168,6 @@ def do_experiment(experiment, data, split_seed, steps_per_epoch, config, plot_id
     stats, preds = do_evaluation(
         model,
         (datagen, X_test, y_test)
-        is_verbose('experiments', config)
     )
 
     preds = extract_preds(
@@ -184,6 +200,7 @@ def do_experiments(experiments, data, split_seed, steps_per_epoch, config, out_f
             config,
             plot_ids
         )
+        summary['name'] = experiment['name']
 
         model_out_folder = get_model_output_folder(out_folder, experiment['name'])
         out_f = model_out_folder / config.get('experiments', 'output file')

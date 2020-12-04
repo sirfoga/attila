@@ -27,7 +27,7 @@ srun::
 	--cpus-per-task=4 \
 	--gres=gpu:1 \
 	--mem-per-cpu=2583 \
-	--time=02:00:00 \
+	--time=01:00:00 \
 	--account=p_ml_cv \
 	--pty bash
 

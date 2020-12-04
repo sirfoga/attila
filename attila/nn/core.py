@@ -4,17 +4,17 @@ from tensorflow.keras import backend as K
 from attila.nn.metrics import mean_IoU, DSC
 
 
-def do_training(model, datagen, steps_per_epoch, n_epochs, compile_args, callbacks):
+def do_training(model, train_gen, valid_gen, steps_per_epoch, n_epochs, compile_args, callbacks):
     model.compile(**compile_args)
-    return None
-    # return model.fit(
-    #     datagen,
-    #     steps_per_epoch=steps_per_epoch
-    #     epochs=n_epochs,
-    #     callbacks=callbacks,
-    #     # workers=1,  # todo fix taurus writing
-    #     # use_multiprocessing=False,
-    # )  # history
+    return model.fit(
+        train_gen,
+        validation_data=valid_gen
+        steps_per_epoch=steps_per_epoch,
+        epochs=n_epochs,
+        callbacks=callbacks,
+        # workers=1,  # todo fix taurus writing
+        # use_multiprocessing=False,
+    )  # history
 
 
 def do_inference(model, data, verbose=False):
@@ -46,8 +46,7 @@ def do_evaluation(model, data):
 
     preds = do_inference(
         model,
-        (datagen, X_test),
-        batch_size
+        (datagen, X_test)
     )
 
     stats = {
