@@ -79,7 +79,7 @@ def get_background(foreground):
 
     out = foreground.copy()
     out[out > 1] = 1  # threshold
-    out[out < 0] = =  # threshold
+    out[out < 0] = 0  # threshold
     out = 1 - out  # flip (1 is background pixel now)
 
     return out
@@ -103,15 +103,20 @@ def img2channels():
     def _f(x):
         borders = get_borders(x)
         foreground = get_foreground(x, borders)
-        background = get_background(foreground + borders):
+        background = get_background(foreground + borders)
 
         out = np.append(
             add_dim()(foreground),
+            add_dim()(borders),
+            axis=-1
+        )
+        out = np.append(
+            out,
             add_dim()(background),
             axis=-1
-        )  # each pixels is a one-hot vector
+        )
 
-        return out
+        return out  # each pixels is a one-hot vector
 
     return _f
 
