@@ -9,10 +9,10 @@ _here = Path('.').resolve()
 
 
 def dirs(folder):
-    return filter(
+    return sorted(filter(
         lambda p: p.is_dir(),
         folder.iterdir()
-    )
+    ))
 
 
 def get_summary(folder, config):
