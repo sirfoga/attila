@@ -10,6 +10,7 @@ from attila.util.plots import extract_preds, plot_sample
 from attila.nn.models.unet import calc_img_shapes, build as build_model
 from attila.nn.core import do_training, do_evaluation
 from attila.nn.metrics import mean_IoU, DSC
+from attila.nn.losses import PlotLosses
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation
@@ -163,7 +164,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
             patience=3,
             min_lr=1e-5,
             verbose=verbose
-        )
+        ),
+        PlotLosses()
     ]
 
     results = do_training(
