@@ -45,7 +45,7 @@ def get_default_args(config):
 
     compile_args = {  # todo use dict(
         'optimizer': config.get('training', 'optimizer'),
-        'loss': CategoricalCrossentropy(), 
+        'loss': config.get('training', 'loss'), 
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
