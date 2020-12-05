@@ -160,7 +160,7 @@ def final_path(n_classes, activation, padding, use_se_block):
             n_channel_out,
             (1, ) * n_dim,
             padding=padding,
-            activation='softmax'  # force a probability distribution
+            activation=activation  # force a probability distribution
         )(x)
         return x
 

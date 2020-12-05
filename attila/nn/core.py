@@ -7,7 +7,7 @@ from attila.nn.metrics import mean_IoU, DSC
 def do_training(model, data_gen, training_steps_per_epoch, validation_steps_per_epoch, n_epochs, compile_args, callbacks):
     (train_gen, valid_gen) = data_gen
     model.compile(**compile_args)
-    return model.fit(
+    return model.fit_generator(
         train_gen,
         validation_data=valid_gen,
         validation_steps=validation_steps_per_epoch,

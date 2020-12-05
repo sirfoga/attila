@@ -6,12 +6,15 @@ def conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout=0.0, ba
 
     def _f(x):
         for _ in range(inner_layers):
-            x = Conv2D(n_filters, kernel_shape, padding=padding)(x)
-
             if batchnorm:
                 x = BatchNormalization()(x)
 
-            x = Activation(activation=activation)(x)
+            x = Conv2D(
+                n_filters,
+                kernel_shape,
+                padding=padding,
+                activation=activation
+            )(x)
 
             if use_se_block:
                 x = se_block()(x)
