@@ -1,6 +1,7 @@
 import random
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.losses import CategoricalCrossentropy
 
 from sklearn.model_selection import train_test_split
 
@@ -9,7 +10,6 @@ from attila.util.plots import extract_preds, plot_sample
 from attila.nn.models.unet import calc_img_shapes, build as build_model
 from attila.nn.core import do_training, do_evaluation
 from attila.nn.metrics import mean_IoU, DSC
-from attila.nn.losses import weighted_categorical_crossentropy
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation
@@ -44,7 +44,7 @@ def get_default_args(config):
 
     compile_args = {  # todo use dict(
         'optimizer': config.get('training', 'optimizer'),
-        'loss': weighted_categorical_crossentropy([1.0, 5.0, 0.5]),
+        'loss': CategoricalCrossentropy(), 
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
