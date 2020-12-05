@@ -9,6 +9,7 @@ from attila.util.plots import extract_preds, plot_sample
 from attila.nn.models.unet import calc_img_shapes, build as build_model
 from attila.nn.core import do_training, do_evaluation
 from attila.nn.metrics import mean_IoU, DSC
+from attila.nn.losses import weighted_categorical_crossentropy
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation
@@ -43,7 +44,7 @@ def get_default_args(config):
 
     compile_args = {  # todo use dict(
         'optimizer': config.get('training', 'optimizer'),
-        'loss': config.get('training', 'loss'),
+        'loss': weighted_categorical_crossentropy([1.0, 5.0, 0.5]),
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
@@ -156,7 +157,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
     model, compile_args = get_model(experiment, config)
     verbose = is_verbose('experiments', config)
     callbacks = [
-        EarlyStopping(patience=10, verbose=verbose),
+        EarlyStopping(patience=20, verbose=verbose),
         ReduceLROnPlateau(
             factor=1e-1,
             patience=3,

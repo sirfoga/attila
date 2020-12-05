@@ -113,9 +113,7 @@ def img2channels():
         )
         out = np.append(out, add_dim()(background), axis=-1)
 
-        assert np.sum(out, axis=-1) == np.ones((out.shape[0], out.shape[1]))
-
-        return out
+        return out  # each pixels is a one-hot vector
 
     return _f
 
