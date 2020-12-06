@@ -16,6 +16,7 @@ from attila.data.transform import crop_center_transformation
 
 from attila.util.config import is_verbose
 from attila.util.io import stuff2pickle
+from attila.util.ml import are_gpu_avail
 
 
 def get_experiments(options):
@@ -174,42 +175,45 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
         ),
     ]
 
-    results = do_training(
-        model,
-        _get_datagen(
-            X_train,
-            y_train,
-            augment=config.getboolean('data', 'aug'),
-            phase='training'
-        ),
-        int(2.0 * len(X_train) / config.getint('training', 'batch size')),
-        int(2.0 * len(X_test) / config.getint('training', 'batch size')),
-        config.getint('training', 'epochs'),
-        compile_args,
-        callbacks
-    )
+    if are_gpu_avail():  # prevent CPU melting
+        results = do_training(
+            model,
+            _get_datagen(
+                X_train,
+                y_train,
+                augment=config.getboolean('data', 'aug'),
+                phase='training'
+            ),
+            int(2.0 * len(X_train) / config.getint('training', 'batch size')),
+            int(2.0 * len(X_test) / config.getint('training', 'batch size')),
+            config.getint('training', 'epochs'),
+            compile_args,
+            callbacks
+        )
 
-    (gen, flowing_args) = _get_datagen(
-        augment=False,
-        phase='evaluation'
-    )
-    stats, preds = do_evaluation(
-        model,
-        (gen, flowing_args, X_test, y_test)
-    )
+        (gen, flowing_args) = _get_datagen(
+            augment=False,
+            phase='evaluation'
+        )
+        stats, preds = do_evaluation(
+            model,
+            (gen, flowing_args, X_test, y_test)
+        )
 
-    preds = extract_preds(
-        X_test,
-        y_test,
-        preds,
-        plot_ids
-    )
+        preds = extract_preds(
+            X_test,
+            y_test,
+            preds,
+            plot_ids
+        )
 
-    return {
-        'history': results.history,
-        'stats': stats,
-        'preds': preds
-    }
+        return {
+            'history': results.history,
+            'stats': stats,
+            'preds': preds
+        }
+
+    return {}
 
 
 def do_experiments(experiments, data, split_seed, config, out_folder, plot_ids):

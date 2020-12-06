@@ -119,14 +119,35 @@ def middle_block(kernel_shape, padding, dropout, batchnorm, conv_inner_layers, f
     return _f
 
 
-def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers):
+def up_conv(pool_shape, conv_args):
     upsampling = UpSampling2D(pool_shape)
+
+    def _f(x):
+        x = upsampling(x)
+        x = conv2d_block(**conv_args)(x)
+        return x
+
+    return _f
+
+
+def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers):
 
     def _f(x):
         if use_se_block:
             x = se_block()(x)
 
-        x = upsampling(x)
+        x = up_conv(
+            pool_shape,
+            dict(
+                n_filters=n_filters,
+                kernel_shape=kernel_shape,
+                padding=padding,
+                use_se_block=use_se_block,
+                dropout=dropout,
+                batchnorm=batchnorm,
+                inner_layers=conv_inner_layers
+            )
+        )(x)
 
         using_skip_conn = not (skip_conn is None)
         if using_skip_conn:
@@ -141,6 +162,7 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
             batchnorm,
             inner_layers=conv_inner_layers
         )(x)
+        
         return x
 
     return _f
