@@ -45,7 +45,7 @@ def get_default_args(config):
 
     compile_args = {  # todo use dict(
         'optimizer': config.get('training', 'optimizer'),
-        'loss': weighted_categorical_crossentropy([1.0, 2.0, 0.1]), 
+        'loss': weighted_categorical_crossentropy([1.0, 2.0, 0.2]), 
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
@@ -82,8 +82,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
         )(img_inp_shape)
 
 
-    def _get_datagen(X=None, y=None, augment=False, phase='training'):
-        inp_gen_args = dict
+    def _get_datagen(X, y=None, augment=False, phase='training'):
+        inp_gen_args = dict(
             featurewise_center=True,  # X <- X - mean(X) ...
             featurewise_std_normalization=True,  # ... and also std
             samplewise_center=False,
@@ -138,11 +138,12 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
             return zip(train_inp_gen, train_out_gen), zip(val_inp_gen, val_out_gen)
         elif phase == 'evaluation':
             gen = ImageDataGenerator(**inp_gen_args)
-            flowing_args = dict(
+            gen.fit(X)
+            return gen.flow(
+                X,
                 shuffle=False,
                 batch_size=1  # 1 img at a time
             )
-            return gen, flowing_args
 
         return None
 
@@ -187,13 +188,13 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
             callbacks
         )
 
-        (gen, flowing_args) = _get_datagen(
-            augment=False,
+        gen = _get_datagen(
+            X_test,
             phase='evaluation'
         )
         stats, preds = do_evaluation(
             model,
-            (gen, flowing_args, X_test, y_test)
+            (gen, y_test)
         )
 
         preds = extract_preds(

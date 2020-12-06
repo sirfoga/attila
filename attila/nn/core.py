@@ -28,7 +28,7 @@ def do_inference(model, gen, steps, verbose=False):
 
 
 def do_evaluation(model, data):
-    (gen, flowing_args, X_test, y_test) = data
+    (gen, y_test) = data
     metrics = [
         {
             'name': 'attila_metrics_mean_IoU',
@@ -42,8 +42,8 @@ def do_evaluation(model, data):
 
     preds = do_inference(
         model,
-        gen.flow(X_test, **flowing_args),
-        steps=len(X_test)
+        gen,
+        steps=len(y_test)
     )
 
     stats = {
