@@ -1,4 +1,4 @@
-import random
+import numpy as np
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -8,7 +8,7 @@ from attila.util.plots import extract_preds, plot_sample
 
 from attila.nn.models.unet import calc_img_shapes, build as build_model
 from attila.nn.core import do_training, do_evaluation
-from attila.nn.metrics import mean_IoU, DSC
+from attila.nn.metrics import mean_IoU, DSC, calc_accuracy
 from attila.nn.losses import weighted_categorical_crossentropy
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
@@ -17,6 +17,7 @@ from attila.data.transform import crop_center_transformation
 from attila.util.config import is_verbose
 from attila.util.io import stuff2pickle
 from attila.util.ml import are_gpu_avail
+from attila.nn.sanity import do_sanity_check
 
 
 def get_experiments(options):
@@ -69,7 +70,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, split_seed, config, plot_ids):
+def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_checks=True):
     def _get_shapes(inp):
         img_inp_shape = inp.shape[1: 2 + 1]  # width, height of input images
         return calc_img_shapes(
@@ -161,7 +162,6 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
 
     (X_train, X_test, y_train, y_test) = _prepare_data(data)
     model, compile_args = get_model(experiment, config)
-    model.summary()
     callbacks = [
         EarlyStopping(patience=20, verbose=is_verbose('experiments', config)),
         ReduceLROnPlateau(
@@ -171,6 +171,19 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
             verbose=is_verbose('experiments', config)
         ),
     ]
+
+    if do_sanity_checks:
+        # model.summary()
+        do_sanity_check(
+            y_train[np.random.randint(len(y_train))],  # random training sample
+            [
+                calc_accuracy(),
+                mean_IoU(),
+                DSC()
+            ]
+        )
+
+    1/0
 
     if are_gpu_avail():  # prevent CPU melting
         results = do_training(
@@ -241,11 +254,8 @@ def do_batch_experiments(experiments, data, config, out_folder):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=config.getfloat('experiments', 'test size')
     )
-    num_plots = 6
-    plot_ids = [
-        random.randint(0, len(X_test) - 1)
-        for _ in range(num_plots)
-    ]
+    num_plots = 5
+    plot_ids = np.random.randint(len(X_test), size=num_plots)
     if is_verbose('experiments', config):
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
