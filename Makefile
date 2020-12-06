@@ -22,11 +22,9 @@ get-out::
 srun::
 	srun \
 	--partition=ml \
-	--nodes=1 \
-	--tasks=1 \
 	--cpus-per-task=2 \
 	--gres=gpu:1 \
-	--mem-per-cpu=2583 \
+	--mem-per-cpu=2048 \
 	--time=01:00:00 \
 	--account=p_ml_cv \
 	--pty bash

@@ -86,7 +86,16 @@ def contracting_path(n_filters, n_layers, kernel_shape, pool_shape, use_skip_con
         current_n_filters = n_filters
 
         for _ in range(n_layers):
-            x, s = contracting_block(current_n_filters, kernel_shape, pool_shape, padding, use_se_block, dropout, batchnorm, conv_inner_layers)(x)
+            x, s = contracting_block(
+                current_n_filters,
+                kernel_shape,
+                pool_shape,
+                padding,
+                use_se_block,
+                dropout,
+                batchnorm,
+                conv_inner_layers
+            )(x)
             current_n_filters = int(current_n_filters * filter_mult)
 
             if not use_skip_conn:
@@ -123,7 +132,15 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
         if using_skip_conn:
             x = concatenate([x, skip_conn])
 
-        x = conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout, batchnorm, inner_layers=conv_inner_layers)(x)
+        x = conv2d_block(
+            n_filters,
+            kernel_shape,
+            padding,
+            use_se_block,
+            dropout,
+            batchnorm,
+            inner_layers=conv_inner_layers
+        )(x)
         return x
 
     return _f
@@ -162,6 +179,7 @@ def final_path(n_classes, activation, padding, use_se_block):
             padding=padding,
             activation=activation  # force a probability distribution
         )(x)
+
         return x
 
     return _f
@@ -192,10 +210,7 @@ def unet_block(n_filters, n_layers, kernel_shape, pool_shape, n_classes, final_a
             filter_mult
         )(x)
 
-        if use_skip_conn:
-            current_n_filters = skip_conns[-1].shape[-1]
-        else:
-            current_n_filters = n_filters * filter_mult ** (n_layers - 1)
+        current_n_filters = n_filters * filter_mult ** (n_layers - 1)
 
         x = expanding_path(
             current_n_filters,

@@ -82,11 +82,11 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
 
 
     def _get_datagen(X=None, y=None, augment=False, phase='training'):
-        gen_args = dict(  # todo try normalize ?
-            featurewise_center=False,
-            featurewise_std_normalization=False,
-            samplewise_center=False,
-            samplewise_std_normalization=False,
+        gen_args = dict(
+            featurewise_center=True,
+            featurewise_std_normalization=True,
+            samplewise_center=True,
+            samplewise_std_normalization=True,
         )
 
         if phase == 'training':
@@ -108,24 +108,32 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
                 random_state=split_seed
             )
 
-            gen = ImageDataGenerator(**gen_args)
-
             # create the training data generator (already flowing)
-            train_inp_gen = gen.flow(
+            train_inp_gen = ImageDataGenerator(**gen_args)
+            train_inp_gen.fit(X_train)
+            train_inp_gen = train_inp_gen.flow(
                 X_train,
                 **flowing_args
             )
-            train_out_gen = gen.flow(
+
+            train_out_gen = ImageDataGenerator(**gen_args)
+            train_out_gen.fit(y_train)
+            train_out_gen = train_out_gen.flow(
                 y_train,
                 **flowing_args
             )
 
             # create the validation data generator (already flowing)
-            val_inp_gen = gen.flow(
+            val_inp_gen = ImageDataGenerator(**gen_args)
+            val_inp_gen.fit(X_val)
+            val_inp_gen = val_inp_gen.flow(
                 X_val,
                 **flowing_args
             )
-            val_out_gen = gen.flow(
+
+            val_out_gen = ImageDataGenerator(**gen_args)
+            val_out_gen.fit(y_val)
+            val_out_gen = val_out_gen.flow(
                 y_val,
                 **flowing_args
             )
@@ -155,14 +163,14 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
 
     (X_train, X_test, y_train, y_test) = _prepare_data(data)
     model, compile_args = get_model(experiment, config)
-    verbose = is_verbose('experiments', config)
+    model.summary()
     callbacks = [
-        EarlyStopping(patience=20, verbose=verbose),
+        EarlyStopping(patience=20, verbose=is_verbose('experiments', config)),
         ReduceLROnPlateau(
             factor=1e-1,
             patience=3,
             min_lr=1e-5,
-            verbose=verbose
+            verbose=is_verbose('experiments', config)
         ),
     ]
 
@@ -174,8 +182,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
             augment=config.getboolean('data', 'aug'),
             phase='training'
         ),
-        len(X_train) // config.getint('training', 'batch size'),
-        len(X_test) // config.getint('training', 'batch size'),
+        int(2.0 * len(X_train) / config.getint('training', 'batch size')),
+        int(2.0 * len(X_test) / config.getint('training', 'batch size')),
         config.getint('training', 'epochs'),
         compile_args,
         callbacks

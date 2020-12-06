@@ -16,11 +16,11 @@ def conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout=0.0, ba
                 activation=activation
             )(x)
 
-            if use_se_block:
-                x = se_block()(x)
-
             if dropout > 0:
                 x = Dropout(dropout)(x)
+
+        if use_se_block:
+            x = se_block()(x)
 
         return x
 
