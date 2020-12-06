@@ -47,20 +47,25 @@ def gen_foreground_img(shape):
     return gen_ch_img(shape, 0)
 
 
-def do_sanity_check(ground_truth, checks, f_out='   - {}: {:.5f}'):
-    def _compute_checks(img):
+def do_sanity_check(samples, checks, config, f_out='   - {}: {:.3f} +- {:.2f}'):
+    def _compute_checks(samples, y_pred):
         for check in checks:
-            yield check(ground_truth, img)
+            res = [
+                check(sample, img)
+                for sample in samples
+            ]
+            yield (np.mean(res), np.std(res))
 
+    img_shape = (config.getint('image', 'height'), config.getint('image', 'width'))
+    n_channels = config.getint('image', 'n classes')
     imgs = [
-        (gen_random_img((512, 512, 3)), 'RANDOM'),
-        (gen_background_img((512, 512, 3)), 'ALL BLACKS'),
-        (gen_foreground_img((512, 512, 3)), 'FOREGROUND'),
+        (gen_random_img((*img_shape, n_channels)), 'RANDOM'),
+        (gen_background_img((*img_shape, n_channels)), 'ALL BLACKS'),
+        (gen_foreground_img((*img_shape, n_channels)), 'FOREGROUND'),
     ]
 
-    print('=== SANITY CHECKS ===')
-
+    print('=== SANITY CHECKS on {} samples ==='.format(len(samples)))
     for img, title in imgs:
         print(' == {}'.format(title))
-        for check, val in zip(checks, _compute_checks(img)):
-            print(f_out.format(check.__name__, val))
+        for check, res in zip(checks, _compute_checks(samples, img)):
+            print(f_out.format(check.__name__, *res))

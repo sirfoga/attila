@@ -1,5 +1,5 @@
-from tensorflow.keras import backend as K
-from tensorflow.keras.metrics import Accuracy
+from keras import backend as K
+from keras.metrics import Accuracy
 
 
 def eps_divide(n, d, eps=K.epsilon()):

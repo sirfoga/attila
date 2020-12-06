@@ -1,5 +1,5 @@
-from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import MaxPooling2D, Conv2D, UpSampling2D, concatenate, Cropping2D
+from keras import Input, Model
+from keras.layers import MaxPooling2D, Conv2D, UpSampling2D, concatenate, Cropping2D
 from attila.nn.models.blocks import se_block, conv2d_block
 
 

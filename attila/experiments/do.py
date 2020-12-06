@@ -1,6 +1,6 @@
 import numpy as np
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.preprocessing.image import ImageDataGenerator
 
 from sklearn.model_selection import train_test_split
 
@@ -70,7 +70,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_checks=True):
+def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_checks=False):
     def _get_shapes(inp):
         img_inp_shape = inp.shape[1: 2 + 1]  # width, height of input images
         return calc_img_shapes(
@@ -162,28 +162,38 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
     (X_train, X_test, y_train, y_test) = _prepare_data(data)
     model, compile_args = get_model(experiment, config)
+    n_epochs = config.getint('training', 'epochs')
     callbacks = [
-        EarlyStopping(patience=20, verbose=is_verbose('experiments', config)),
+        EarlyStopping(
+            patience=int(n_epochs / 2),
+            verbose=True
+        ),
         ReduceLROnPlateau(
             factor=1e-1,
-            patience=3,
+            patience=int(n_epochs / 10),
             min_lr=1e-5,
             verbose=is_verbose('experiments', config)
         ),
     ]
 
     if do_sanity_checks:
-        # model.summary()
+        model.summary()
+
+        n_samples = 4
         do_sanity_check(
-            y_train[np.random.randint(len(y_train))],  # random training sample
+            [
+                y_train[np.random.randint(len(y_train))]
+                for _ in range(n_samples)
+            ],  # random training samples
             [
                 calc_accuracy(),
                 mean_IoU(),
-                DSC()
-            ]
+                DSC(),
+                # todo loss
+            ],
+            config
         )
 
-    1/0
 
     if are_gpu_avail():  # prevent CPU melting
         results = do_training(
@@ -194,9 +204,9 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
                 augment=config.getboolean('data', 'aug'),
                 phase='training'
             ),
-            int(4.0 * len(X_train) / config.getint('training', 'batch size')),
-            int(4.0 * len(X_test) / config.getint('training', 'batch size')),
-            config.getint('training', 'epochs'),
+            int(2.0 * len(X_train) / config.getint('training', 'batch size')),
+            int(2.0 * len(X_test) / config.getint('training', 'batch size')),
+            n_epochs,
             compile_args,
             callbacks
         )
@@ -248,7 +258,7 @@ def do_experiments(experiments, data, split_seed, config, out_folder, plot_ids):
         stuff2pickle(summary, out_f)
 
 
-def do_batch_experiments(experiments, data, config, out_folder):
+def do_batch_experiments(experiments, data, config, out_folder, do_sanity_checks=True):
     nruns = config.getint('experiments', 'nruns')
     (X, y) = data  # unpack
     X_train, X_test, y_train, y_test = train_test_split(
@@ -258,6 +268,22 @@ def do_batch_experiments(experiments, data, config, out_folder):
     plot_ids = np.random.randint(len(X_test), size=num_plots)
     if is_verbose('experiments', config):
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
+
+    if do_sanity_checks:
+        batch_size = 8
+        do_sanity_check(
+            [
+                y[np.random.randint(len(y))]
+                for _ in range(batch_size)
+            ],  # random training samples
+            [
+                calc_accuracy(),
+                mean_IoU(),
+                DSC(),
+                # todo loss
+            ],
+            config
+        )
 
     for nrun in range(nruns):
         folder = out_folder / 'run-{}'.format(nrun)
