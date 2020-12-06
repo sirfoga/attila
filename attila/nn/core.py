@@ -50,11 +50,11 @@ def do_evaluation(model, data):
         metric['name']: []
         for metric in metrics
     }
-    for y, p in zip(gen.flow(y_test, **flowing_args), preds):
+    for y, p in zip(y_test, preds):
         for metric in metrics:
             metric_f = metric['callback']
             metric_val = metric_f(
-                K.cast(y, dtype='float32'),  # todo check type
+                K.cast(y, dtype='float32'),
                 K.cast(p, dtype='float32')
             ).numpy()
             stats[metric['name']].append(metric_val)

@@ -83,11 +83,11 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
 
 
     def _get_datagen(X=None, y=None, augment=False, phase='training'):
-        gen_args = dict(
-            featurewise_center=True,
-            featurewise_std_normalization=True,
-            samplewise_center=True,
-            samplewise_std_normalization=True,
+        inp_gen_args = dict
+            featurewise_center=True,  # X <- X - mean(X) ...
+            featurewise_std_normalization=True,  # ... and also std
+            samplewise_center=False,
+            samplewise_std_normalization=False,
         )
 
         if phase == 'training':
@@ -110,38 +110,34 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
             )
 
             # create the training data generator (already flowing)
-            train_inp_gen = ImageDataGenerator(**gen_args)
+            train_inp_gen = ImageDataGenerator(**inp_gen_args)
             train_inp_gen.fit(X_train)
             train_inp_gen = train_inp_gen.flow(
                 X_train,
                 **flowing_args
             )
 
-            train_out_gen = ImageDataGenerator(**gen_args)
-            train_out_gen.fit(y_train)
-            train_out_gen = train_out_gen.flow(
+            train_out_gen = ImageDataGenerator().flow(
                 y_train,
                 **flowing_args
             )
 
             # create the validation data generator (already flowing)
-            val_inp_gen = ImageDataGenerator(**gen_args)
+            val_inp_gen = ImageDataGenerator(**inp_gen_args)
             val_inp_gen.fit(X_val)
             val_inp_gen = val_inp_gen.flow(
                 X_val,
                 **flowing_args
             )
 
-            val_out_gen = ImageDataGenerator(**gen_args)
-            val_out_gen.fit(y_val)
-            val_out_gen = val_out_gen.flow(
+            val_out_gen = ImageDataGenerator().flow(
                 y_val,
                 **flowing_args
             )
 
             return zip(train_inp_gen, train_out_gen), zip(val_inp_gen, val_out_gen)
         elif phase == 'evaluation':
-            gen = ImageDataGenerator(**gen_args)
+            gen = ImageDataGenerator(**inp_gen_args)
             flowing_args = dict(
                 shuffle=False,
                 batch_size=1  # 1 img at a time
@@ -184,8 +180,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids):
                 augment=config.getboolean('data', 'aug'),
                 phase='training'
             ),
-            int(2.0 * len(X_train) / config.getint('training', 'batch size')),
-            int(2.0 * len(X_test) / config.getint('training', 'batch size')),
+            int(4.0 * len(X_train) / config.getint('training', 'batch size')),
+            int(4.0 * len(X_test) / config.getint('training', 'batch size')),
             config.getint('training', 'epochs'),
             compile_args,
             callbacks
