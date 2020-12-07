@@ -7,3 +7,10 @@ def is_numpy_array(x):
 
 def is_lst(x):
     return isinstance(x, type([]))
+
+
+def dict2numpy(x):
+    return {
+        k: np.float32(val)
+        for k, val in x.items()
+    }

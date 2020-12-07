@@ -1,4 +1,4 @@
-from keras.layers import Conv2D, BatchNormalization, Activation, Dropout, multiply, Dense, GlobalAveragePooling2D
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Dropout, multiply, Dense, GlobalAveragePooling2D
 
 
 def conv2d_block(n_filters, kernel_shape, padding, use_se_block, dropout=0.0, batchnorm=True, inner_layers=1):

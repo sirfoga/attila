@@ -1,5 +1,7 @@
-from keras import Input, Model
-from keras.layers import MaxPooling2D, Conv2D, UpSampling2D, concatenate, Cropping2D
+from tensorflow.keras import Input, Model
+from tensorflow.keras.layers import MaxPooling2D, Conv2D, UpSampling2D, concatenate, Cropping2D
+
+
 from attila.nn.models.blocks import se_block, conv2d_block
 
 
@@ -203,7 +205,7 @@ def final_path(n_classes, activation, padding, use_se_block):
             n_channel_out,
             (1, ) * n_dim,
             padding=padding,
-            activation=activation  # force a probability distribution
+            activation=activation
         )(x)
 
         return x

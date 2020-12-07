@@ -56,7 +56,7 @@ def do_evaluation(model, data):
             metric_val = metric_f(
                 K.cast(y, dtype='float32'),
                 K.cast(p, dtype='float32')
-            ).numpy()
+            )
             stats[metric['name']].append(metric_val)
     
     return stats, preds

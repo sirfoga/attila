@@ -1,6 +1,7 @@
 import numpy as np
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.optimizers import Adam
 
 from sklearn.model_selection import train_test_split
 
@@ -18,6 +19,7 @@ from attila.util.config import is_verbose
 from attila.util.io import stuff2pickle
 from attila.util.ml import are_gpu_avail
 from attila.nn.sanity import do_sanity_check
+from attila.util.data import dict2numpy
 
 
 def get_experiments(options):
@@ -45,7 +47,7 @@ def get_default_args(config):
     }
 
     compile_args = {  # todo use dict(
-        'optimizer': config.get('training', 'optimizer'),
+        'optimizer': Adam(learning_rate=2e-5),  # magic learning rate
         'loss': weighted_categorical_crossentropy([1.0, 2.0, 0.2]), 
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
@@ -165,12 +167,12 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
     n_epochs = config.getint('training', 'epochs')
     callbacks = [
         EarlyStopping(
-            patience=int(n_epochs / 2),
+            patience=int(n_epochs / 2),  # run at least half epochs
             verbose=True
         ),
         ReduceLROnPlateau(
             factor=1e-1,
-            patience=int(n_epochs / 10),
+            patience=int(n_epochs / 10),  # heuristic
             min_lr=1e-5,
             verbose=is_verbose('experiments', config)
         ),
@@ -228,9 +230,9 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
         )
 
         return {
-            'history': results.history,
-            'stats': stats,
-            'preds': preds
+            'history': dict2numpy(results.history),
+            'stats': dict2numpy(stats),
+            'preds': np.float32(preds)
         }
 
     return {}
