@@ -48,7 +48,7 @@ def get_default_args(config):
 
     compile_args = {  # todo use dict(
         'optimizer': Adam(learning_rate=2e-5),  # magic learning rate
-        'loss': weighted_categorical_crossentropy([1.0, 2.0, 0.2]), 
+        'loss': weighted_categorical_crossentropy([1.0, 10.0, 1.0]), 
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
