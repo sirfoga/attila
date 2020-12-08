@@ -147,7 +147,7 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
             dict(
                 n_filters=n_filters,
                 kernel_shape=kernel_shape,
-                padding=padding,
+                padding='same',
                 use_se_block=use_se_block,
                 dropout=dropout,
                 batchnorm=batchnorm,

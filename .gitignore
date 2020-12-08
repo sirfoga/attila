@@ -9,6 +9,8 @@ out.*/
 */out/*
 .vscode/
 config.ini
+*.err
+*.out
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

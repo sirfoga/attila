@@ -181,7 +181,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
     if do_sanity_checks:
         model.summary()
 
-        n_samples = 4
+        n_samples = 8
         do_sanity_check(
             [
                 y_train[np.random.randint(len(y_train))]
