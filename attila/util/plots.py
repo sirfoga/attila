@@ -108,7 +108,9 @@ def plot_history(history, last=None, out_folder=None):
 
 
 def extract_preds(X, y, preds, ixs):
-    out = []
+    Xs = []
+    ys = []
+    ps = []
 
     for ix in ixs:
         ground_truth_foreground, ground_truth_borders = get_mask(y, ix)
@@ -116,14 +118,19 @@ def extract_preds(X, y, preds, ixs):
 
         pred_foreground, _ = get_mask(preds, ix)
 
-        out.append(
-            (X[ix, ..., 0], ground_truth, pred_foreground)
-        )
+        Xs.append(X[ix, ..., 0])
+        ys.append(ground_truth)
+        ps.append(pred_foreground)
 
-    return out
+    return Xs, ys, ps
+
 
 def plot_preds(summary, cmap, out_folder=None):
-    for i, (X, y, pred) in enumerate(summary):
+    Xs = list(summary[0])
+    ys = list(summary[1])
+    preds = list(summary[2])
+
+    for i, (X, y, pred) in enumerate((Xs, ys, preds)):
         plt.imshow(X, cmap=cmap)
         if out_folder:
             plt.gcf().savefig(out_folder / 'input_{}.png'.format(i))

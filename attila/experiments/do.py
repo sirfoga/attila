@@ -232,7 +232,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
         return {
             'history': dict2numpy(results.history),
             'stats': dict2numpy(stats),
-            'preds': np.float32(preds)
+            'preds': [ np.float32(x) for x in preds ]  # maybe different size
         }
 
     return {}

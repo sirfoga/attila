@@ -1,18 +1,6 @@
 [
     {
         "use_skip_conn":true,
-        "padding":"same",
-        "use_se_block":false,
-        "name":"with_same"
-    },
-    {
-        "use_skip_conn":false,
-        "padding":"same",
-        "use_se_block":false,
-        "name":"without_same"
-    },
-    {
-        "use_skip_conn":true,
         "padding":"valid",
         "name":"with_valid",
         "use_se_block":false
