@@ -48,7 +48,7 @@ def get_default_args(config):
 
     compile_args = {  # todo use dict(
         'optimizer': Adam(learning_rate=2e-5),  # magic learning rate
-        'loss': weighted_categorical_crossentropy([1.0, 10.0, 1.0]), 
+        'loss': weighted_categorical_crossentropy([1.0, 1.0, 1.0]), 
         'metrics': ['accuracy', mean_IoU(), DSC()]
     }
 
@@ -171,8 +171,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
             verbose=True
         ),
         ReduceLROnPlateau(
-            factor=1e-1,
-            patience=int(n_epochs / 10),  # heuristic
+            factor=1e-1, 
+            patience=5,  # no time to waste
             min_lr=1e-5,
             verbose=is_verbose('experiments', config)
         ),
@@ -260,7 +260,7 @@ def do_experiments(experiments, data, split_seed, config, out_folder, plot_ids):
         stuff2pickle(summary, out_f)
 
 
-def do_batch_experiments(experiments, data, config, out_folder, do_sanity_checks=True):
+def do_batch_experiments(experiments, data, config, out_folder, do_sanity_checks=False):
     nruns = config.getint('experiments', 'nruns')
     (X, y) = data  # unpack
     X_train, X_test, y_train, y_test = train_test_split(
