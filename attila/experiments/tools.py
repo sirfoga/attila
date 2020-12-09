@@ -29,6 +29,7 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
                 _vals = np.ravel([
                     run[model][key]['all']
                     for run in runs
+                    if model in run
                 ])
 
                 across_runs[model][key] = {
@@ -48,7 +49,10 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
 
 
     print('creating .tex table for {} runs'.format(len(runs)))
-    model_names = list(runs[0].keys())
+    model_names = [
+        model['name']
+        for model in models_config
+    ]
     across_runs, best_values = _get_across_runs(model_names, metric_keys, runs)
 
     row_table_f = '{} & {} & {} & {} & {} \\\\'

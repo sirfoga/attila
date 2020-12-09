@@ -130,7 +130,7 @@ def plot_preds(summary, cmap, out_folder=None):
     ys = list(summary[1])
     preds = list(summary[2])
 
-    for i, (X, y, pred) in enumerate((Xs, ys, preds)):
+    for i, (X, y, pred) in enumerate(zip(Xs, ys, preds)):
         plt.imshow(X, cmap=cmap)
         if out_folder:
             plt.gcf().savefig(out_folder / 'input_{}.png'.format(i))
