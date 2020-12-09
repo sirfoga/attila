@@ -14,7 +14,7 @@ def do_training(model, data_gen, training_steps_per_epoch, validation_steps_per_
         steps_per_epoch=training_steps_per_epoch,
         epochs=n_epochs,
         callbacks=callbacks,
-        # workers=1,  # todo fix taurus writing
+        # workers=1,  # cluster writing
         # use_multiprocessing=False,
     )  # history
 

@@ -34,8 +34,8 @@ def calc_img_shapes(n_layers, conv_layers, conv_size, pool_size, padding, adjust
         inp_shape = x
         out_shape = x
 
-        if adjust:
-            inp_shape = _sub_tup(inp_shape, conv_crop)  # todo very hacky
+        if adjust:  # supposing size_valid = size_same - conv_crop, very hacky
+            inp_shape = _sub_tup(inp_shape, conv_crop)
             inp_shape = tuple(int(x) for x in inp_shape)
 
             out_shape = _sub_tup(out_shape, conv_crop)

@@ -22,35 +22,28 @@ from attila.nn.sanity import do_sanity_check
 from attila.util.data import dict2numpy
 
 
-def get_experiments(options):
-    # `options` is like
-    # {
-    #     'use_skip_conn': [True, False],
-    #     'padding': ['same', 'valid'],
-    #     'use_se_block': [True, False]
-    # }
-    return []  # todo
-
-
 def get_default_args(config):
-    model_args = {  # todo use dict(
-        'n_filters': config.getint('unet', 'n filters'),
-        'n_layers': config.getint('unet', 'n layers'),
-        'kernel_size': config.getint('unet', 'conv size'),
-        'pool_size': config.getint('unet', 'pool size'),
-        'n_classes': config.getint('image', 'n classes'),
-        'final_activation': config.get('unet', 'final activation'),
-        'dropout': config.getfloat('unet', 'dropout'),
-        'batchnorm': config.getboolean('unet', 'batchnorm'),
-        'conv_inner_layers': config.getint('unet', 'n conv inner layers'),
-        'filter_mult': config.getint('unet', 'filter mult'),
-    }
+    model_args = dict(
+        n_filters=config.getint('unet', 'n filters'),
+        n_layers=config.getint('unet', 'n layers'),
+        kernel_size=config.getint('unet', 'conv size'),
+        pool_size=config.getint('unet', 'pool size'),
+        n_classes=config.getint('image', 'n classes'),
+        final_activation=config.get('unet', 'final activation'),
+        dropout=config.getfloat('unet', 'dropout'),
+        batchnorm=config.getboolean('unet', 'batchnorm'),
+        conv_inner_layers=config.getint('unet', 'n conv inner layers'),
+        filter_mult=config.getint('unet', 'filter mult'),
+    )
 
-    compile_args = {  # todo use dict(
-        'optimizer': Adam(learning_rate=2e-5),  # magic learning rate
-        'loss': weighted_categorical_crossentropy([1.0, 1.0, 1.0]), 
-        'metrics': ['accuracy', mean_IoU(), DSC()]
-    }
+    magic_learning_rate = 2e-5  # @karpathy suggested 3e-4
+    loss_weights = np.ones(config.getint('image', 'n classes'))
+    
+    compile_args = dict(
+        optimizer=Adam(learning_rate=magic_learning_rate),
+        loss=weighted_categorical_crossentropy(loss_weights), 
+        metrics=['accuracy', mean_IoU(), DSC()]
+    )
 
     return model_args, compile_args
 
@@ -107,11 +100,11 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
                 out_gen_args['horizontal_flip'] = True
                 out_gen_args['vertical_flip'] = True
 
-            flowing_args = {  # todo use dict(
-                'batch_size': config.getint('training', 'batch size'),
-                'seed': split_seed,
-                'shuffle': True  # re-order samples each epoch
-            }
+            flowing_args = dict(
+                batch_size=config.getint('training', 'batch size'),
+                seed=split_seed,
+                shuffle=True  # re-order samples each epoch
+            )
 
             # do the train/test split
             X_train, X_val, y_train, y_val = train_test_split(
@@ -278,7 +271,7 @@ def do_experiments(experiments, data, split_seed, config, out_folder, plot_ids):
         stuff2pickle(summary, out_f)
 
 
-def do_batch_experiments(experiments, data, config, out_folder, do_sanity_checks=False):
+def do_batch_experiments(experiments, data, config, out_folder):
     nruns = config.getint('experiments', 'nruns')
     (X, y) = data  # unpack
     X_train, X_test, y_train, y_test = train_test_split(
@@ -288,22 +281,6 @@ def do_batch_experiments(experiments, data, config, out_folder, do_sanity_checks
     plot_ids = np.random.randint(len(X_test), size=num_plots)
     if is_verbose('experiments', config):
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
-
-    if do_sanity_checks:
-        batch_size = 8
-        do_sanity_check(
-            [
-                y[np.random.randint(len(y))]
-                for _ in range(batch_size)
-            ],  # random training samples
-            [
-                calc_accuracy(),
-                mean_IoU(),
-                DSC(),
-                # todo loss
-            ],
-            config
-        )
 
     for nrun in range(nruns):
         folder = out_folder / 'run-{}'.format(nrun)
@@ -315,7 +292,7 @@ def do_batch_experiments(experiments, data, config, out_folder, do_sanity_checks
         do_experiments(
             experiments,
             (X_train, X_test, y_train, y_test),
-            nrun,  # todo choose better seed
+            nrun,
             config,
             folder,
             plot_ids=plot_ids
