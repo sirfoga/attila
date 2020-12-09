@@ -92,12 +92,20 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
             samplewise_center=False,
             samplewise_std_normalization=False,
         )
+        out_gen_args = dict(
+            featurewise_center=False,
+            featurewise_std_normalization=False,  
+            samplewise_center=False,
+            samplewise_std_normalization=False,
+        )
 
         if phase == 'training':
-            if augment:
+            if augment:  # todo add more augmentations
                 inp_gen_args['horizontal_flip'] = True
                 inp_gen_args['vertical_flip'] = True
-                # todo add more augmentations
+                
+                out_gen_args['horizontal_flip'] = True
+                out_gen_args['vertical_flip'] = True
 
             flowing_args = {  # todo use dict(
                 'batch_size': config.getint('training', 'batch size'),
@@ -112,28 +120,38 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
                 random_state=split_seed
             )
 
+            seed = np.random.randint(0, 42)
+            fit_args = dict(
+                augment=augment,
+                seed=seed
+            )
+
             # create the training data generator (already flowing)
             train_inp_gen = ImageDataGenerator(**inp_gen_args)
-            train_inp_gen.fit(X_train)
+            train_inp_gen.fit(X_train, **fit_args)
             train_inp_gen = train_inp_gen.flow(
                 X_train,
                 **flowing_args
             )
 
-            train_out_gen = ImageDataGenerator().flow(
+            train_out_gen = ImageDataGenerator(**out_gen_args)
+            train_out_gen.fit(y_train, **fit_args)
+            train_out_gen = train_out_gen.flow(
                 y_train,
                 **flowing_args
             )
 
             # create the validation data generator (already flowing)
             val_inp_gen = ImageDataGenerator(**inp_gen_args)
-            val_inp_gen.fit(X_val)
+            val_inp_gen.fit(X_val, **fit_args)
             val_inp_gen = val_inp_gen.flow(
                 X_val,
                 **flowing_args
             )
 
-            val_out_gen = ImageDataGenerator().flow(
+            train_out_gen = ImageDataGenerator(**out_gen_args)
+            train_out_gen.fit(y_train, **fit_args)
+            val_out_gen = train_out_gen.flow(
                 y_val,
                 **flowing_args
             )
