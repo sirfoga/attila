@@ -149,9 +149,9 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
                 **flowing_args
             )
 
-            train_out_gen = ImageDataGenerator(**out_gen_args)
-            train_out_gen.fit(y_train, **fit_args)
-            val_out_gen = train_out_gen.flow(
+            val_out_gen = ImageDataGenerator(**out_gen_args)
+            val_out_gen.fit(y_val, **fit_args)
+            val_out_gen = val_out_gen.flow(
                 y_val,
                 **flowing_args
             )
