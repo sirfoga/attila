@@ -95,8 +95,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
         if phase == 'training':
             if augment:
-                gen_args['horizontal_flip'] = True
-                gen_args['vertical_flip'] = True
+                inp_gen_args['horizontal_flip'] = True
+                inp_gen_args['vertical_flip'] = True
                 # todo add more augmentations
 
             flowing_args = {  # todo use dict(
