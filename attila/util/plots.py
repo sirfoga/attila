@@ -75,7 +75,7 @@ def plot_history(history, last=None, out_folder=None):
                 if p_max < adjusted_scale[0]:  # will not be seen
                     adjusted_scale[0] = p_max
 
-            ax.set_ylim(adjusted_scale)  # fixed_scale
+            # ax.set_ylim(adjusted_scale)  # fixed_scale
 
         ax.plot(training, label='training {}'.format(key), color=color)
         ax.plot(validation, '--', label='validation {}'.format(key), color=color)
