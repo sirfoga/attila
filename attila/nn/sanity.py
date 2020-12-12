@@ -69,3 +69,8 @@ def do_sanity_check(samples, checks, config, f_out='   - {}: {:.3f} +- {:.2f}'):
         print(' == {}'.format(title))
         for check, res in zip(checks, _compute_checks(samples, img)):
             print(f_out.format(check.__name__, *res))
+
+
+def get_steps_per_epoch(X, bs):
+    out = len(X) / bs
+    return int(math.ceil(out))

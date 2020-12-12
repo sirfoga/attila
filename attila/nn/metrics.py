@@ -1,5 +1,7 @@
 from keras import backend as K
 from tensorflow.keras.metrics import Accuracy
+from tensorflow.keras.layers import Cropping2D
+
 
 
 def eps_divide(n, d, eps=K.epsilon()):
@@ -13,7 +15,7 @@ def cast_threshold(x, threshold):
 
 
 def get_binary_img(x, threshold=0.5):
-    # todo hacky way to compute: consider only foreground + borders
+    # hacky way to compute: consider only foreground + borders
 
     x = K.sum(  # sum all channels ...
         x[..., :-1],  # ... apart background (implicitely you also sum it, since it's a probability distribution)
@@ -21,6 +23,13 @@ def get_binary_img(x, threshold=0.5):
     )
     x = K.expand_dims(x, axis=-1)  # restore axis
     x = cast_threshold(x, threshold)
+
+    # hacky way to enforce same size metrics not depending on padding
+    valid_padding_size = 324
+    crop_size = x.shape[1] - valid_padding_size
+    crop_size = int(crop_size / 2)  # side by side
+    x = Cropping2D(crop_size)(x)
+
     return x  # (batch size, height, width, 1)
 
 

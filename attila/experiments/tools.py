@@ -60,11 +60,12 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
     #             name       SE?      IoU
 
     rows = []
+    epsilon = 5e-4
     for model, results in across_runs.items():
         _2tex = {}
 
         for key in metric_keys:
-            if results[key]['mean'] >= best_values[key]:
+            if results[key]['mean'] >= best_values[key] - epsilon:
                 _2tex[key] = '\\textbf{{{:.3f}}}'.format(results[key]['mean'])
             else:
                 _2tex[key] = '{:.3f}'.format(results[key]['mean'])

@@ -18,7 +18,7 @@ from attila.data.transform import crop_center_transformation
 from attila.util.config import is_verbose
 from attila.util.io import stuff2pickle
 from attila.util.ml import are_gpu_avail
-from attila.nn.sanity import do_sanity_check
+from attila.nn.sanity import do_sanity_check, get_steps_per_epoch
 from attila.util.data import dict2numpy
 
 
@@ -50,12 +50,12 @@ def get_default_args(config):
 
 def get_experiment_args(experiment, config):
     model_args, compile_args = get_default_args(config)
-    args = {  # todo use dict(
+    args = dict(
         **model_args,
-        'padding': experiment['padding'],
-        'use_skip_conn': experiment['use_skip_conn'],
-        'use_se_block': experiment['use_se_block']
-    }
+        padding=experiment['padding'],
+        use_skip_conn=experiment['use_skip_conn'],
+        use_se_block=experiment['use_se_block']
+    )
 
     return args, compile_args
 
@@ -80,16 +80,16 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
     def _get_datagen(X, y=None, augment=False, phase='training'):
         inp_gen_args = dict(
-            featurewise_center=True,  # X <- X - mean(X) ...
-            featurewise_std_normalization=True,  # ... and also std
-            samplewise_center=False,
-            samplewise_std_normalization=False,
+            featurewise_center=False,  # X <- X - mean(X) ...
+            featurewise_std_normalization=False,  # ... and also std
+            samplewise_center=True,
+            samplewise_std_normalization=True,
         )
         out_gen_args = dict(
             featurewise_center=False,
             featurewise_std_normalization=False,  
-            samplewise_center=False,
-            samplewise_std_normalization=False,
+            samplewise_center=True,
+            samplewise_std_normalization=True,
         )
 
         if phase == 'training':
@@ -174,6 +174,10 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
 
     (X_train, X_test, y_train, y_test) = _prepare_data(data)
+    if is_verbose('experiments', config):
+        print('training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
+        print('validation data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
+
     model, compile_args = get_model(experiment, config)
     n_epochs = config.getint('training', 'epochs')
     callbacks = [
@@ -209,6 +213,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
 
     if are_gpu_avail():  # prevent CPU melting
+        bs = config.getint('training', 'batch size')
+
         results = do_training(
             model,
             _get_datagen(
@@ -217,8 +223,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
                 augment=config.getboolean('data', 'aug'),
                 phase='training'
             ),
-            int(2.0 * len(X_train) / config.getint('training', 'batch size')),
-            int(2.0 * len(X_test) / config.getint('training', 'batch size')),
+            get_steps_per_epoch(X_train, bs),
+            get_steps_per_epoch(X_test, bs),
             n_epochs,
             compile_args,
             callbacks
@@ -275,7 +281,9 @@ def do_batch_experiments(experiments, data, config, out_folder):
     nruns = config.getint('experiments', 'nruns')
     (X, y) = data  # unpack
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=config.getfloat('experiments', 'test size')
+        X, y,
+        test_size=config.getfloat('experiments', 'test size'),
+        random_state=42  # reproducible results
     )
     num_plots = 5
     plot_ids = np.random.randint(len(X_test), size=num_plots)
