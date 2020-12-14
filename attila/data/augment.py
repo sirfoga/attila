@@ -1,42 +1,31 @@
 import numpy as np
+from PIL import Image, ImageFilter
 
 from attila.util.f import apply_f
 
 
-def flip():
-    """ vertical flipping (prev: sun on top, after: sun on bottom) """
-
-    def _f(x):
-        """ np.array of shape (n pixels, m pixels, c channels), e.g (256, 256, 3)"""
-
-        return np.flip(x, axis=0)
-
-    return _f
+def blur(img):
+    im = Image.fromarray(np.uint8(img * 255))
+    im = im.filter(ImageFilter.BLUR)
+    return np.array(im)
 
 
-def flop():
-    """ horizontal flipping (prev: sun on left, after: sun on right) """
-
-    def _f(x):
-        """ np.array of shape (n pixels, m pixels, c channels), e.g (256, 256, 3)"""
-
-        return np.flip(x, axis=1)
-
-    return _f
+def make_noise(img):
+    mu, std = 0, 20
+    noise = np.random.normal(mu, std, img.shape)
+    return np.clip(img + noise, 0, 255)
 
 
-def do_augmentation(data, augm):
-    data_augm = apply_f(
-        data,
-        augm,
-        to_numpy=True
-    )
-    return np.append(data, data_augm, axis=0)
+from matplotlib import pyplot as plt
 
 
-def do_augmentations(X, y, augmentations):
-    for augm in augmentations:
-        X = do_augmentation(X, augm)
-        y = do_augmentation(y, augm)
+def do_augment(img):
+    plt.gca().hist(img.ravel(), bins=256)  # breakpoint
 
-    return X, y
+    _u = np.random.uniform(0.0, 1.0)
+    if _u < 0.33:
+        return make_noise(img)
+    elif _u < 0.66:
+        return blur(img)
+    
+    return img  # do nothing

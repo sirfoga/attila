@@ -2,22 +2,10 @@ from pathlib import Path
 
 from attila.util.config import get_env
 from attila.util.plots import plot_history, plot_preds
-from attila.util.io import load_pickle, append_rows2text, load_json
+from attila.util.io import load_pickle, append_rows2text, load_json, get_summary, dirs
 from attila.experiments.tools import experiment2tex, runs2tex
 
 _here = Path('.').resolve()
-
-
-def dirs(folder):
-    return sorted(filter(
-        lambda p: p.is_dir(),
-        folder.iterdir()
-    ))
-
-
-def get_summary(folder, config):
-    summary_file = folder / config.get('experiments', 'output file')
-    return load_pickle(summary_file)
 
 
 def make_history(config, out_path):

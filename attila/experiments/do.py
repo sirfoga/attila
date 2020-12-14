@@ -14,6 +14,7 @@ from attila.nn.losses import weighted_categorical_crossentropy
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
 from attila.data.transform import crop_center_transformation
+from attila.data.augment import do_augment
 
 from attila.util.config import is_verbose
 from attila.util.io import stuff2pickle
@@ -65,7 +66,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_checks=False):
+def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None, do_sanity_checks=False):
     def _get_shapes(inp):
         img_inp_shape = inp.shape[1: 2 + 1]  # width, height of input images
         return calc_img_shapes(
@@ -93,12 +94,14 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
         )
 
         if phase == 'training':
-            if augment:  # todo add more augmentations
+            if augment:
                 inp_gen_args['horizontal_flip'] = True
                 inp_gen_args['vertical_flip'] = True
+                inp_gen_args['preprocessing_function'] = do_augment
                 
                 out_gen_args['horizontal_flip'] = True
                 out_gen_args['vertical_flip'] = True
+                out_gen_args['preprocessing_function'] = do_augment
 
             flowing_args = dict(
                 batch_size=config.getint('training', 'batch size'),
@@ -175,6 +178,9 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
     (X_train, X_test, y_train, y_test) = _prepare_data(data)
     model, compile_args = get_model(experiment, config)
+    if optimizer:
+        compile_args['optimizer'] = optimizer
+
     n_epochs = config.getint('training', 'epochs')
     callbacks = [
         EarlyStopping(

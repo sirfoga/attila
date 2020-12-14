@@ -37,3 +37,15 @@ def stuff2pickle(stuff, f_path):
 def load_pickle(f_path):
     with open(f_path, 'rb') as fp:
         return pickle.load(fp)
+
+
+def get_summary(folder, config):
+    summary_file = folder / config.get('experiments', 'output file')
+    return load_pickle(summary_file)
+
+
+def dirs(folder):
+    return sorted(filter(
+        lambda p: p.is_dir(),
+        folder.iterdir()
+    ))
