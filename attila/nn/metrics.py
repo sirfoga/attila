@@ -1,7 +1,8 @@
 from keras import backend as K
 from tensorflow.keras.metrics import Accuracy
 from tensorflow.keras.layers import Cropping2D
-from tensorflow.keras.experimental.preprocessing import CenterCrop
+
+from attila.patch.layers import CenterCrop
 
 
 

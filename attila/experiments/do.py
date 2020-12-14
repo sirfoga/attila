@@ -225,8 +225,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
                 augment=config.getboolean('data', 'aug'),
                 phase='training'
             ),
-            get_steps_per_epoch(X_train, bs),
-            get_steps_per_epoch(X_test, bs),
+            get_steps_per_epoch(X_train, bs, multi=1.0),
+            get_steps_per_epoch(X_test, bs, multi=1.0),
             n_epochs,
             compile_args,
             callbacks
