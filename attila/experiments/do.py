@@ -174,10 +174,6 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, do_sanity_chec
 
 
     (X_train, X_test, y_train, y_test) = _prepare_data(data)
-    if is_verbose('experiments', config):
-        print('training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
-        print('validation data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
-
     model, compile_args = get_model(experiment, config)
     n_epochs = config.getint('training', 'epochs')
     callbacks = [
@@ -285,10 +281,12 @@ def do_batch_experiments(experiments, data, config, out_folder):
         test_size=config.getfloat('experiments', 'test size'),
         random_state=42  # reproducible results
     )
-    num_plots = 5
-    plot_ids = np.random.randint(len(X_test), size=num_plots)
     if is_verbose('experiments', config):
+        print('training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
         print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
+
+    num_plots = 4
+    plot_ids = np.random.randint(len(X_test), size=num_plots)
 
     for nrun in range(nruns):
         folder = out_folder / 'run-{}'.format(nrun)

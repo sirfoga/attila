@@ -47,16 +47,11 @@ def do_evaluation(model, data):
     )
 
     stats = {
-        metric['name']: []
+        metric['name']: metric['callback'](
+            K.cast(y_test, dtype='float32'),
+            K.cast(preds, dtype='float32')
+        )
         for metric in metrics
     }
-    for y, p in zip(y_test, preds):
-        for metric in metrics:
-            metric_f = metric['callback']
-            metric_val = metric_f(
-                K.cast(y, dtype='float32'),
-                K.cast(p, dtype='float32')
-            )
-            stats[metric['name']].append(metric_val)
     
     return stats, preds

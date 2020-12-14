@@ -57,7 +57,7 @@ def mean_IoU(threshold=0.5):
 
     def _f(y_true, y_pred):
         if not is_from_batch(y_true):
-            y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
+            y_true = K.expand_dims(y_pred, axis=0)  # add "batch axis"
         
         if not is_from_batch(y_pred):
             y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
