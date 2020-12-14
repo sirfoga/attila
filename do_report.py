@@ -26,11 +26,7 @@ def make_plots(config, out_path):
     for run_folder in dirs(out_path):
         for model_folder in dirs(run_folder):
             summary = get_summary(model_folder, config)
-            plot_preds(
-                summary['preds'],
-                config.get('image', 'cmap'),
-                model_folder
-            )
+            
 
 
 def make_tex(models_config, config, out_path):

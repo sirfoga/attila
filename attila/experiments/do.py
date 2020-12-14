@@ -81,19 +81,25 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
 
     def _get_datagen(X, y=None, augment=False, phase='training'):
         inp_gen_args = dict(
-            featurewise_center=False,  # X <- X - mean(X) ...
-            featurewise_std_normalization=False,  # ... and also std
-            samplewise_center=True,
-            samplewise_std_normalization=True,
+            featurewise_center=False,  # NOT ~ batchnorm on first layer
+            featurewise_std_normalization=False,
+            samplewise_center=False,
+            samplewise_std_normalization=False,
         )
         out_gen_args = dict(
             featurewise_center=False,
-            featurewise_std_normalization=False,  
-            samplewise_center=True,
-            samplewise_std_normalization=True,
+            featurewise_std_normalization=False,
+            samplewise_center=False,
+            samplewise_std_normalization=False,
         )
 
         if phase == 'training':
+            flowing_args = dict(
+                batch_size=config.getint('training', 'batch size'),
+                seed=split_seed,
+                shuffle=True  # re-order samples each epoch
+            )
+
             if augment:
                 inp_gen_args['horizontal_flip'] = True
                 inp_gen_args['vertical_flip'] = True
@@ -101,13 +107,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
                 
                 out_gen_args['horizontal_flip'] = True
                 out_gen_args['vertical_flip'] = True
-                out_gen_args['preprocessing_function'] = do_augment
 
-            flowing_args = dict(
-                batch_size=config.getint('training', 'batch size'),
-                seed=split_seed,
-                shuffle=True  # re-order samples each epoch
-            )
 
             # do the train/test split
             X_train, X_val, y_train, y_val = train_test_split(
@@ -127,7 +127,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
             train_inp_gen.fit(X_train, **fit_args)
             train_inp_gen = train_inp_gen.flow(
                 X_train,
-                **flowing_args
+                **flowing_args  # no need for 'subset' since we're flowing all
             )
 
             train_out_gen = ImageDataGenerator(**out_gen_args)
@@ -184,6 +184,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
     n_epochs = config.getint('training', 'epochs')
     callbacks = [
         EarlyStopping(
+            monitor='loss',
             patience=int(n_epochs / 2),  # run at least half epochs
             verbose=True
         ),
@@ -216,17 +217,18 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
 
     if are_gpu_avail():  # prevent CPU melting
         bs = config.getint('training', 'batch size')
+        augment = config.getboolean('data', 'aug')
 
         results = do_training(
             model,
             _get_datagen(
                 X_train,
                 y_train,
-                augment=config.getboolean('data', 'aug'),
+                augment=augment,
                 phase='training'
             ),
-            get_steps_per_epoch(X_train, bs, multi=1.0),
-            get_steps_per_epoch(X_test, bs, multi=1.0),
+            get_steps_per_epoch(X_train, bs),
+            get_steps_per_epoch(X_test, bs),
             n_epochs,
             compile_args,
             callbacks

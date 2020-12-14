@@ -15,7 +15,7 @@ def experiment2tex(summary, metric_keys=['attila_metrics_mean_IoU', 'attila_metr
             'all': results[key],
         }
 
-    return summary['name'], out
+    return summary['name'] if 'name' in summary else None, out
 
 
 def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attila_metrics_DSC']):
