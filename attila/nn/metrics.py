@@ -1,6 +1,7 @@
 from keras import backend as K
 from tensorflow.keras.metrics import Accuracy
 from tensorflow.keras.layers import Cropping2D
+from tensorflow.keras.experimental.preprocessing import CenterCrop
 
 
 
@@ -15,6 +16,10 @@ def cast_threshold(x, threshold):
 
 
 def get_binary_img(x, threshold=0.5):
+    # hacky way to enforce same size metrics not depending on padding
+    valid_padding_size = 324
+    x = CenterCrop(valid_padding_size, valid_padding_size)(x)
+
     # hacky way to compute: consider only foreground + borders
 
     x = K.sum(  # sum all channels ...
@@ -23,12 +28,6 @@ def get_binary_img(x, threshold=0.5):
     )
     x = K.expand_dims(x, axis=-1)  # restore axis
     x = cast_threshold(x, threshold)
-
-    # hacky way to enforce same size metrics not depending on padding
-    valid_padding_size = 324
-    crop_size = x.shape[1] - valid_padding_size
-    crop_size = int(crop_size / 2)  # side by side
-    x = Cropping2D(crop_size)(x)
 
     return x  # (batch size, height, width, 1)
 
@@ -57,13 +56,13 @@ def mean_IoU(threshold=0.5):
 
     def _f(y_true, y_pred):
         if not is_from_batch(y_true):
-            y_true = K.expand_dims(y_pred, axis=0)  # add "batch axis"
+            y_true = K.expand_dims(y_true, axis=0)  # add "batch axis"
         
         if not is_from_batch(y_pred):
             y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
 
-        y_pred = get_binary_img(y_pred)
         y_true = get_binary_img(y_true)
+        y_pred = get_binary_img(y_pred)
 
         inter = get_intersection(y_true, y_pred)
         union = get_alls(y_true, y_pred) - inter

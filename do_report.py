@@ -9,7 +9,7 @@ _here = Path('.').resolve()
 
 
 def make_history(config, out_path):
-    last_epochs = 150  # int(config.getint('training', 'epochs') * 0.8)
+    last_epochs = int(config.getint('training', 'epochs') * 0.8)
 
     for run_folder in dirs(out_path):
         for model_folder in dirs(run_folder):
