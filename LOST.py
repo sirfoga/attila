@@ -80,7 +80,8 @@ def main():
                 config,
                 plot_ids,
                 optimizer=optim['f'],
-                do_sanity_checks=False
+                do_sanity_checks=False,
+                callbacks=[]
             )
             
             out_folder = out_path / 'trials' / 'optimizers' / optim['name']

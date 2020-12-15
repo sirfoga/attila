@@ -66,7 +66,7 @@ def get_model(experiment, config):
     return build_model(**args), compile_args
 
 
-def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None, do_sanity_checks=False):
+def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None, do_sanity_checks=False, callbacks=None):
     def _get_shapes(inp):
         img_inp_shape = inp.shape[1: 2 + 1]  # width, height of input images
         return calc_img_shapes(
@@ -182,19 +182,20 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
         compile_args['optimizer'] = optimizer
 
     n_epochs = config.getint('training', 'epochs')
-    callbacks = [
-        EarlyStopping(
-            monitor='loss',
-            patience=int(n_epochs / 2),  # run at least half epochs
-            verbose=True
-        ),
-        ReduceLROnPlateau(
-            factor=1e-1, 
-            patience=5,  # no time to waste
-            min_lr=1e-5,
-            verbose=is_verbose('experiments', config)
-        ),
-    ]
+    if callbacks is None:
+        callbacks = [
+            EarlyStopping(
+                monitor='loss',
+                patience=int(n_epochs / 2),  # run at least half epochs
+                verbose=True
+            ),
+            ReduceLROnPlateau(
+                factor=1e-1, 
+                patience=5,  # no time to waste
+                min_lr=1e-5,
+                verbose=is_verbose('experiments', config)
+            ),
+        ]
 
     if do_sanity_checks:
         model.summary()
