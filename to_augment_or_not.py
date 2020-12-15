@@ -28,7 +28,7 @@ def main():
         (config.getint('image', 'width'), config.getint('image', 'height'))
     )
 
-    config.set('experiments', 'test size', '0.9')  # or any other big amount (< 1)
+    config.set('experiments', 'test size', '0.95')  # or any other big amount (< 1)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y,

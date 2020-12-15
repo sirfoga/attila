@@ -50,16 +50,16 @@ def main():
 
     optimizers = [
         {
+            'name': 'adam, lr = 1e-2',
+            'f': Adam(learning_rate=1e-2)
+        },
+        {
             'name': 'adam, lr = 1e-3',
             'f': Adam(learning_rate=1e-3)
         },
         {
             'name': 'adam, lr = 1e-4',
             'f': Adam(learning_rate=1e-4)
-        },
-        {
-            'name': 'adam, lr = 1e-5',
-            'f': Adam(learning_rate=1e-5)
         },
         {
             'name': 'sgd, U-Net paper',
