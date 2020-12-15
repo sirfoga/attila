@@ -50,7 +50,7 @@ def plot_sample(X, y, cmap='magma', ix=None, out_folder=None):
     return ix
 
 
-def plot_history(history, last=None, out_folder=None):
+def plot_history(history, last=None, out_folder=None, loss_scale=[0, 0.02], met_scale=[0.96, 1]):
     if last is None:
         last = 0
 
@@ -87,12 +87,12 @@ def plot_history(history, last=None, out_folder=None):
             ax.plot(np.argmax(validation), np.max(validation), marker='x', color='r')
 
     def _plot_results(results, ax):
-        _plot_key(ax, 'loss', results, 'C1', scale=[0, 0.02], find_min=True)
+        _plot_key(ax, 'loss', results, 'C1', scale=loss_scale, find_min=True)
 
         ax = ax.twinx()  # instantiate a second axes that shares the same x-axis
 
-        _plot_key(ax, 'attila_metrics_mean_IoU', results, 'C0', scale=[0.96, 1], find_max=True)
-        _plot_key(ax, 'attila_metrics_DSC', results, 'C2', scale=[0.96, 1], find_max=True)
+        _plot_key(ax, 'attila_metrics_mean_IoU', results, 'C0', scale=met_scale, find_max=True)
+        _plot_key(ax, 'attila_metrics_DSC', results, 'C2', scale=met_scale, find_max=True)
 
 
     results = {

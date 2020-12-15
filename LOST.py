@@ -9,7 +9,7 @@ from attila.experiments.do import do_batch_experiments, do_experiment
 from attila.util.config import get_env
 from attila.util.io import load_json, stuff2pickle, get_summary, dirs
 from attila.util.ml import are_gpu_avail
-from attila.util.plots import extract_preds
+from attila.util.plots import extract_preds, plot_history
 
 _here = Path('.').resolve()
 
@@ -46,7 +46,7 @@ def main():
     }  # vanilla U-Net
 
     config.set('data', 'aug', 'False')
-    config.set('training', 'epochs', '20')
+    config.set('training', 'epochs', '50')
 
     optimizers = [
         {
@@ -62,7 +62,11 @@ def main():
             'f': Adam(learning_rate=1e-4)
         },
         {
-            'name': 'sgd, U-Net paper',
+            'name': 'adam, lr = 1e-5',
+            'f': Adam(learning_rate=1e-5)
+        },
+        {
+            'name': 'sgd, high momentum',
             'f': SGD(momentum=0.99)
         }
     ]
@@ -79,8 +83,9 @@ def main():
                 do_sanity_checks=False
             )
             
-            out_folder = out_path / 'trials' / 'optimizers' / optim['name'] / config.get('experiments', 'output file')
+            out_folder = out_path / 'trials' / 'optimizers' / optim['name']
             out_folder.mkdir(parents=True, exist_ok=True)
+
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
@@ -89,9 +94,12 @@ def main():
             summary = get_summary(folder, config)
             plot_history(
                 summary['history'],
-                out_folder=folder
+                last=0,
+                out_folder=folder,
+                loss_scale=[0, 0.5],
+                met_scale=[0.5, 1]
             )
-            print('history img saved in {}'.format(model_folder))
+            print('history img saved in {}'.format(folder))
 
 
 if __name__ == '__main__':
