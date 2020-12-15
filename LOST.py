@@ -45,7 +45,8 @@ def main():
         "name": "with_same"
     }  # vanilla U-Net
 
-    config.set('training', 'epochs', '50')
+    config.set('data', 'aug', 'False')
+    config.set('training', 'epochs', '20')
 
     optimizers = [
         {
@@ -80,12 +81,13 @@ def main():
             
             out_folder = out_path / 'trials' / 'optimizers' / optim['name'] / config.get('experiments', 'output file')
             out_folder.mkdir(parents=True, exist_ok=True)
+            out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
     if not are_gpu_avail():  # only with CPU
         for folder in dirs(out_path / 'trials' / 'optimizers'):
             summary = get_summary(folder, config)
-                plot_history(
+            plot_history(
                 summary['history'],
                 out_folder=folder
             )

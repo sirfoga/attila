@@ -103,7 +103,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
             if augment:
                 inp_gen_args['horizontal_flip'] = True
                 inp_gen_args['vertical_flip'] = True
-                inp_gen_args['preprocessing_function'] = do_augment
+                # inp_gen_args['preprocessing_function'] = do_augment
                 
                 out_gen_args['horizontal_flip'] = True
                 out_gen_args['vertical_flip'] = True

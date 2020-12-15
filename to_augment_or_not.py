@@ -50,13 +50,13 @@ def main():
 
     config.set('experiments', 'val size', '0.3')
     config.set('training', 'batch size', '2')  # very mini-batch size
-    config.set('training', 'epochs', '50')  # or any other small amount
+    config.set('training', 'epochs', '20')
 
     if are_gpu_avail():  # prevent CPU melting
-        def _do_it(out_f):
+        def _do_it(out_name):
             summary = do_experiment(experiment, (X_train, X_test, y_train, y_test), 0, config, plot_ids)
 
-            out_folder = out_path / 'trials' / 'to-aug-or-not' / out_f
+            out_folder = out_path / 'trials' / 'to-aug-or-not' / out_name
             out_folder.mkdir(parents=True, exist_ok=True)
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
