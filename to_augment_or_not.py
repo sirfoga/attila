@@ -49,8 +49,8 @@ def main():
     }
 
     config.set('experiments', 'val size', '0.3')
-    config.set('training', 'batch size', '2')  # very mini-batch size
-    config.set('training', 'epochs', '20')
+    config.set('training', 'batch size', '4')
+    config.set('training', 'epochs', '50')
 
     if are_gpu_avail():  # prevent CPU melting
         def _do_it(out_name):
@@ -62,8 +62,8 @@ def main():
             stuff2pickle(summary, out_f)
 
 
-        # config.set('data', 'aug', 'False')
-        # _do_it('no-aug')
+        config.set('data', 'aug', 'False')
+        _do_it('no-aug')
 
         config.set('data', 'aug', 'True')
         _do_it('aug')

@@ -4,18 +4,14 @@ from keras import backend as K
 from attila.nn.metrics import mean_IoU, DSC
 
 
-def do_training(model, data_gen, training_steps_per_epoch, validation_steps_per_epoch, n_epochs, compile_args, callbacks):
+def do_training(model, data_gen, compile_args, fit_args):
     (train_gen, valid_gen) = data_gen
     model.compile(**compile_args)
+    
     return model.fit(
         train_gen,
         validation_data=valid_gen,
-        validation_steps=validation_steps_per_epoch,
-        steps_per_epoch=training_steps_per_epoch,
-        epochs=n_epochs,
-        callbacks=callbacks,
-        # workers=1,  # cluster writing
-        # use_multiprocessing=False,
+        **fit_args
     )  # history
 
 

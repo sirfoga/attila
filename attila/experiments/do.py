@@ -219,6 +219,15 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
     if are_gpu_avail():  # prevent CPU melting
         bs = config.getint('training', 'batch size')
         augment = config.getboolean('data', 'aug')
+        
+        fit_args = dict(
+            validation_steps=get_steps_per_epoch(X_train, bs),
+            steps_per_epoch=get_steps_per_epoch(X_train, bs, multi=4.0),
+            epochs=n_epochs,
+            callbacks=callbacks,
+            # workers=1,  # cluster writing
+            # use_multiprocessing=False,
+        )
 
         results = do_training(
             model,
@@ -228,11 +237,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
                 augment=augment,
                 phase='training'
             ),
-            get_steps_per_epoch(X_train, bs, multi=1.0 if not augment else 4.0),
-            get_steps_per_epoch(X_test, bs, multi=1.0 if not augment else 4.0),
-            n_epochs,
             compile_args,
-            callbacks
+            fit_args
         )
 
         gen = _get_datagen(
