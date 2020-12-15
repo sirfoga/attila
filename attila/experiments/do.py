@@ -227,8 +227,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
                 augment=augment,
                 phase='training'
             ),
-            get_steps_per_epoch(X_train, bs, mini=1.0 if not augment else 4.0),
-            get_steps_per_epoch(X_test, bs, mini=1.0 if not augment else 4.0),
+            get_steps_per_epoch(X_train, bs, multi=1.0 if not augment else 4.0),
+            get_steps_per_epoch(X_test, bs, multi=1.0 if not augment else 4.0),
             n_epochs,
             compile_args,
             callbacks

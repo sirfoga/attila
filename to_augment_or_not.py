@@ -10,6 +10,7 @@ from attila.util.config import get_env
 from attila.util.io import load_json, stuff2pickle, dirs, get_summary
 from attila.util.plots import extract_preds, plot_history, plot_preds
 from attila.experiments.tools import experiment2tex
+from attila.util.ml import are_gpu_avail
 
 _here = Path('.').resolve()
 
@@ -52,22 +53,20 @@ def main():
     config.set('training', 'epochs', '50')  # or any other small amount
 
     if are_gpu_avail():  # prevent CPU melting
-        config.set('data', 'aug', 'False')
-        summary = do_experiment(experiment, (X_train, X_test, y_train, y_test), 0, config, plot_ids)
+        def _do_it(out_f):
+            summary = do_experiment(experiment, (X_train, X_test, y_train, y_test), 0, config, plot_ids)
 
-        out_folder = out_path / 'trials' / 'to-aug-or-not' / 'no-aug'
-        out_folder.mkdir(parents=True, exist_ok=True)
-        out_f = out_folder / config.get('experiments', 'output file')
-        stuff2pickle(summary, out_f)
+            out_folder = out_path / 'trials' / 'to-aug-or-not' / out_f
+            out_folder.mkdir(parents=True, exist_ok=True)
+            out_f = out_folder / config.get('experiments', 'output file')
+            stuff2pickle(summary, out_f)
+
+
+        # config.set('data', 'aug', 'False')
+        # _do_it('no-aug')
 
         config.set('data', 'aug', 'True')
-
-        summary = do_experiment(experiment, (X_train, X_test, y_train, y_test), 0, config, plot_ids)
-
-        out_folder = out_path / 'trials' / 'to-aug-or-not' / 'aug'
-        out_folder.mkdir(parents=True, exist_ok=True)
-        out_f = out_folder / config.get('experiments', 'output file')
-        stuff2pickle(summary, out_f)
+        _do_it('aug')
 
     if not are_gpu_avail():  # only with CPU
         for folder in dirs(out_path / 'trials' / 'to-aug-or-not'):
