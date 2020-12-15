@@ -97,8 +97,8 @@ def main():
                 summary['history'],
                 last=0,
                 out_folder=folder,
-                loss_scale=[0, 0.5],
-                met_scale=[0.5, 1]
+                loss_scale=[0, 1.0],
+                met_scale=[0.5, 1.0]
             )
             print('history img saved in {}'.format(folder))
 

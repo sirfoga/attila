@@ -81,16 +81,10 @@ def main():
                 summary['history'],
                 last=0,
                 out_folder=folder,
+                loss_scale=[0, 0.5],
+                met_scale=[0.5, 1.0]
             )
             print('history img saved in {}'.format(folder))
-            
-            plot_preds(
-                summary['preds'],
-                config.get('image', 'cmap'),
-                folder
-            )
-            
-            print()
 
 
 if __name__ == '__main__':

@@ -222,7 +222,7 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
         
         fit_args = dict(
             validation_steps=get_steps_per_epoch(X_train, bs),
-            steps_per_epoch=get_steps_per_epoch(X_train, bs, multi=4.0),
+            steps_per_epoch=get_steps_per_epoch(X_train, bs, multi=2.0),
             epochs=n_epochs,
             callbacks=callbacks,
             # workers=1,  # cluster writing
