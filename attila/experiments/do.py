@@ -37,7 +37,7 @@ def get_default_args(config):
         filter_mult=config.getint('unet', 'filter mult'),
     )
 
-    magic_learning_rate = 2e-5  # @karpathy suggested 3e-4
+    magic_learning_rate = 3e-4
     loss_weights = np.ones(config.getint('image', 'n classes'))
     
     compile_args = dict(
