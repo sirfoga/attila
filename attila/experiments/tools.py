@@ -19,10 +19,15 @@ def experiment2tex(summary, metric_keys=['attila_metrics_mean_IoU', 'attila_metr
 
 
 def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attila_metrics_DSC']):
+    models_runned = set()
+    for run in runs:
+        for key in run:
+            models_runned.add(key)
+
     def _get_across_runs(model_names, metric_keys, runs):
         across_runs = {}  # model: { metric : { mean, std}}
         
-        for model in model_names:
+        for model in models_runned:  # todo only the ones in UNION runs
             across_runs[model] = {}
 
             for key in metric_keys:
@@ -40,7 +45,7 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
         best_values = {  # key: max
             key: np.max([
                 across_runs[model][key]['mean']
-                for model in model_names
+                for model in models_runned
             ])  # across all models
             for key in metric_keys
         }
@@ -49,11 +54,11 @@ def runs2tex(runs, models_config, metric_keys=['attila_metrics_mean_IoU', 'attil
 
 
     print('creating .tex table for {} runs'.format(len(runs)))
-    model_names = [
-        model['name']
-        for model in models_config
-    ]
-    across_runs, best_values = _get_across_runs(model_names, metric_keys, runs)
+    across_runs, best_values = _get_across_runs(
+        models_runned,
+        metric_keys,
+        runs
+    )
 
     row_table_f = '{} & {} & {} & {} & {} \\\\'
     #                  skip?    padding    DSC

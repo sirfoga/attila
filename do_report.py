@@ -26,7 +26,11 @@ def make_plots(config, out_path):
     for run_folder in dirs(out_path):
         for model_folder in dirs(run_folder):
             summary = get_summary(model_folder, config)
-            
+            plot_preds(
+                summary['preds'],
+                config.get('image', 'cmap'),
+                model_folder
+            )
 
 
 def make_tex(models_config, config, out_path):
@@ -52,9 +56,9 @@ def main():
     config, _, out_path, models_config_path = get_env(_here)
     models_config = load_json(models_config_path)
 
-    make_tex(models_config, config, out_path)
-    make_history(config, out_path)
-    make_plots(config, out_path)
+    make_tex(models_config, config, out_path / 'big')
+    make_history(config, out_path / 'big')
+    make_plots(config, out_path / 'big')
 
 
 if __name__ == '__main__':

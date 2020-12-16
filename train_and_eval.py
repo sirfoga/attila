@@ -10,6 +10,7 @@ _here = Path('.').resolve()
 
 def main():
     config, data_path, out_path, models_config_path = get_env(_here)
+    out_path = out_path / 'big'
     out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
 
     images_path = data_path / config.get('data', 'images')
