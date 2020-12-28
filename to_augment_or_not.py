@@ -59,7 +59,15 @@ def main():
             config.set('data', 'aug', str(aug))
 
             n_images = val_size * len(X_train)
-            summary = do_experiment(experiment, (X_train, X_test, y_train, y_test), 0, config, plot_ids)
+            summary = do_experiment(
+                experiment,
+                (X_train, X_test, y_train, y_test),
+                0,
+                config,
+                plot_ids,
+                do_sanity_checks=False,
+                callbacks=[]
+            )
             summary['n images'] = n_images
 
             out_folder = out_path / 'trials' / 'to-aug-or-not' / out_name
@@ -86,14 +94,7 @@ def main():
                 vals = vals['all']
                 print('{} (based on {} samples): {:.3f} +- {:.3f}'.format(key, len(vals), vals.mean(), vals.std()))
 
-            plot_history(
-                summary['history'],
-                last=0,
-                out_folder=folder,
-                loss_scale=[0, 0.5],
-                met_scale=[0.5, 1.0]
-            )
-            print('history img saved in {}'.format(folder))
+        # todo plot
 
 
 if __name__ == '__main__':

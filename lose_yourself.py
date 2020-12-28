@@ -15,6 +15,8 @@ _here = Path('.').resolve()
 
 
 def main():
+    """ learning rate VS metrics """
+
     config, data_path, out_path, _ = get_env(_here)
     out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
 
@@ -35,72 +37,55 @@ def main():
     print('train/val data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
     print('test data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
-    num_plots = 4
+    num_plots = 8
     plot_ids = np.random.randint(len(X_test), size=num_plots)
 
     experiment = {
-        "use_skip_conn": False,
+        "use_skip_conn": True,
         "padding": "same",
         "use_se_block": False,
         "name": "with_same"
-    }  # vanilla U-Net
+    }  # vanilla
 
-    config.set('data', 'aug', 'False')
+    config.set('training', 'batch size', '4')
     config.set('training', 'epochs', '50')
-
-    optimizers = [
-        {
-            'name': 'adam, lr = 1e-2',
-            'f': Adam(learning_rate=1e-2)
-        },
-        {
-            'name': 'adam, lr = 1e-3',
-            'f': Adam(learning_rate=1e-3)
-        },
-        {
-            'name': 'adam, lr = 1e-4',
-            'f': Adam(learning_rate=1e-4)
-        },
-        {
-            'name': 'adam, lr = 1e-5',
-            'f': Adam(learning_rate=1e-5)
-        },
-        {
-            'name': 'sgd, high momentum',
-            'f': SGD(momentum=0.99)
-        }
-    ]
+    config.set('data', 'aug', 'False')
 
     if are_gpu_avail():  # prevent CPU melting
-        for optim in optimizers:
+        def _do_it(out_name, learning_rate):
+            optimizer = Adam(learning_rate=learning_rate)
             summary = do_experiment(
                 experiment,
                 (X_train, X_test, y_train, y_test),
                 0,
                 config,
                 plot_ids,
-                optimizer=optim['f'],
+                optimizer=optimizer,
                 do_sanity_checks=False,
                 callbacks=[]
             )
-            
-            out_folder = out_path / 'trials' / 'optimizers' / optim['name']
-            out_folder.mkdir(parents=True, exist_ok=True)
 
+            out_folder = out_path / 'trials' / 'lost' / out_name
+            out_folder.mkdir(parents=True, exist_ok=True)
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
+        learning_rates = np.logspace(-6, -2, 10)
+        
+        for learning_rate in learning_rates:
+            exp_name = 'no-aug-{:.3f}'.format(val_size)
+            _do_it(exp_name, learning_rate)
+
     if not are_gpu_avail():  # only with CPU
-        for folder in dirs(out_path / 'trials' / 'optimizers'):
+        for folder in dirs(out_path / 'trials' / 'lost'):
             summary = get_summary(folder, config)
-            plot_history(
-                summary['history'],
-                last=0,
-                out_folder=folder,
-                loss_scale=[0, 1.0],
-                met_scale=[0.5, 1.0]
-            )
-            print('history img saved in {}'.format(folder))
+            
+            _, results = experiment2tex(summary)
+            for key, vals in results.items():
+                vals = vals['all']
+                print('{} (based on {} samples): {:.3f} +- {:.3f}'.format(key, len(vals), vals.mean(), vals.std()))
+
+        # todo plot
 
 
 if __name__ == '__main__':
