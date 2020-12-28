@@ -16,6 +16,8 @@ _here = Path('.').resolve()
 
 
 def main():
+    """ # training images VS metrics """
+
     config, data_path, out_path, _ = get_env(_here)
     out_path.mkdir(parents=True, exist_ok=True)  # rm and mkdir if existing
 
@@ -28,7 +30,7 @@ def main():
         (config.getint('image', 'width'), config.getint('image', 'height'))
     )
 
-    config.set('experiments', 'test size', '0.95')  # or any other big amount (< 1)
+    config.set('experiments', 'test size', '0.80')  # or any other big amount (< 1)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y,
@@ -38,7 +40,7 @@ def main():
     print('train/val data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
     print('test data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
-    num_plots = 4
+    num_plots = 8
     plot_ids = np.random.randint(len(X_test), size=num_plots)
 
     experiment = {
@@ -46,27 +48,34 @@ def main():
         "padding": "same",
         "use_se_block": False,
         "name": "with_same"
-    }
+    }  # vanilla
 
-    config.set('experiments', 'val size', '0.3')
     config.set('training', 'batch size', '4')
     config.set('training', 'epochs', '50')
 
     if are_gpu_avail():  # prevent CPU melting
-        def _do_it(out_name):
+        def _do_it(out_name, val_size, aug):
+            config.set('experiments', 'val size', str(val_size))
+            config.set('data', 'aug', str(aug))
+
+            n_images = val_size * len(X_train)
             summary = do_experiment(experiment, (X_train, X_test, y_train, y_test), 0, config, plot_ids)
+            summary['n images'] = n_images
 
             out_folder = out_path / 'trials' / 'to-aug-or-not' / out_name
             out_folder.mkdir(parents=True, exist_ok=True)
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
+        val_sizes = np.linspace(0.1, 1.0, 10)
+        
+        for val_size in val_sizes:
+            exp_name = 'no-aug-{:.3f}'.format(val_size)
+            _do_it(exp_name, val_size, False)
 
-        config.set('data', 'aug', 'False')
-        _do_it('no-aug')
-
-        config.set('data', 'aug', 'True')
-        _do_it('aug')
+        for val_size in val_sizes:
+            exp_name = 'aug-{:.3f}'.format(val_size)
+            _do_it(exp_name, val_size, True)
 
     if not are_gpu_avail():  # only with CPU
         for folder in dirs(out_path / 'trials' / 'to-aug-or-not'):
