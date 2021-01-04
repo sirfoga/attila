@@ -1,10 +1,10 @@
 from pathlib import Path
-from sklearn.model_selection import train_test_split
 import numpy as np
 
 from tensorflow.keras.optimizers import Adam, SGD
 
 from attila.data.parse import parse_data, get_data
+from attila.data.prepare import get_train_test_split
 from attila.experiments.do import do_batch_experiments, do_experiment
 from attila.util.config import get_env
 from attila.util.io import load_json, stuff2pickle, dirs, get_summary
@@ -32,13 +32,12 @@ def main():
 
     config.set('experiments', 'test size', '0.80')  # or any other big amount (< 1)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=config.getfloat('experiments', 'test size'),
-        random_state=42  # reproducible results
+    X_train, X_test, y_train, y_test = get_train_test_split(
+        X, 
+        y, 
+        config.getfloat('experiments', 'test size'), 
+        verbose=True
     )
-    print('train/val data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
-    print('test data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
     num_plots = 8
     plot_ids = np.random.randint(len(X_test), size=num_plots)
@@ -79,10 +78,14 @@ def main():
         
         for val_size in val_sizes:
             exp_name = 'no-aug-{:.3f}'.format(val_size)
+            print('doing "{}" experiment'.format(exp_name))
+
             _do_it(exp_name, val_size, False)
 
         for val_size in val_sizes:
             exp_name = 'aug-{:.3f}'.format(val_size)
+            print('doing "{}" experiment'.format(exp_name))
+
             _do_it(exp_name, val_size, True)
 
     if not are_gpu_avail():  # only with CPU

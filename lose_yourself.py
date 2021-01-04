@@ -1,10 +1,10 @@
 from pathlib import Path
-from sklearn.model_selection import train_test_split
 import numpy as np
 
 from tensorflow.keras.optimizers import Adam, SGD
 
 from attila.data.parse import parse_data, get_data
+from attila.data.prepare import get_train_test_split
 from attila.experiments.do import do_batch_experiments, do_experiment
 from attila.util.config import get_env
 from attila.util.io import load_json, stuff2pickle, get_summary, dirs
@@ -29,13 +29,12 @@ def main():
         (config.getint('image', 'width'), config.getint('image', 'height'))
     )
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=config.getfloat('experiments', 'test size'),
-        random_state=42  # reproducible results
+    X_train, X_test, y_train, y_test = get_train_test_split(
+        X, 
+        y, 
+        config.getfloat('experiments', 'test size'), 
+        verbose=True
     )
-    print('train/val data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
-    print('test data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
     num_plots = 8
     plot_ids = np.random.randint(len(X_test), size=num_plots)
@@ -73,7 +72,9 @@ def main():
         learning_rates = np.logspace(-6, -2, 10)
         
         for learning_rate in learning_rates:
-            exp_name = '{:.3f}'.format(val_size)
+            exp_name = '{:.3f}'.format(learning_rate)
+            print('doing "{}" experiment'.format(exp_name))
+
             _do_it(exp_name, learning_rate)
 
     if not are_gpu_avail():  # only with CPU

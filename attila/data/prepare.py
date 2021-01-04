@@ -1,6 +1,21 @@
 from sklearn.model_selection import train_test_split
 
 
+def get_train_test_split(X, y, test_size, verbose=False):
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=test_size,
+        random_state=42  # reproducible results
+    )
+
+    if verbose:
+        print('train/val data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
+        print('test data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
+
+
+    return X_train, X_test, y_train, y_test
+
+
 def train_validate_test_split(X, y, valid_size, test_size, *args, **kwargs):
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=valid_size + test_size, *args, **kwargs
