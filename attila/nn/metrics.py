@@ -16,18 +16,16 @@ def cast_threshold(x, threshold):
     return K.cast(K.greater(x, threshold), dtype='float32')
 
 
-def get_binary_img(x, threshold=0.5, center_crop=0):
-    # hacky way to enforce same size metrics not depending on padding
+def get_binary_img(x, threshold=0.5, center_crop=0, n_classes=2):
     if center_crop > 0:
         x = CenterCrop(center_crop, center_crop)(x)
 
-    if x.shape[-1] > 1:
-        # hacky way to compute: consider only foreground + borders
-        x = K.sum(  # sum all channels ...
-            x[..., :-1],  # ... apart background (implicitely you also sum it, since it's a probability distribution)
-            axis=-1
-        )
-        x = K.expand_dims(x, axis=-1)  # restore axis
+    x = K.sum(  
+        x[..., :n_classes],  # consider only first N classes
+        axis=-1
+    )
+    print(x.shape)
+    x = K.expand_dims(x, axis=-1)  # restore axis
 
     x = cast_threshold(x, threshold)
     return x  # (batch size, height, width, 1)
@@ -66,7 +64,7 @@ def fix_input(x):
 
     return x
 
-def mean_IoU(threshold=0.5):
+def mean_IoU(threshold=0.5, center_crop=0):
     """
     - y_true is a 3D array. Each channel represents the ground truth BINARY channel
     - y_pred is a 3D array. Each channel represents the predicted BINARY channel
@@ -76,8 +74,8 @@ def mean_IoU(threshold=0.5):
         y_true = fix_input(y_true)
         y_pred = fix_input(y_pred)
 
-        y_true = get_binary_img(y_true, center_crop=324)
-        y_pred = get_binary_img(y_pred, center_crop=324)
+        y_true = get_binary_img(y_true, center_crop=center_crop)
+        y_pred = get_binary_img(y_pred, center_crop=center_crop)
 
         inter = get_intersection(y_true, y_pred)
         union = get_alls(y_true, y_pred) - inter
@@ -95,14 +93,11 @@ def DSC(smooth=1.0, threshold=0.5):
     """
 
     def _f(y_true, y_pred):
-        if not is_from_batch(y_true):
-            y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
-        
-        if not is_from_batch(y_pred):
-            y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
+        y_true = fix_input(y_true)
+        y_pred = fix_input(y_pred)
 
-        y_pred = get_binary_img(y_pred, center_crop=324)
-        y_true = get_binary_img(y_true, center_crop=324)
+        y_pred = get_binary_img(y_pred, center_crop=center_crop)
+        y_true = get_binary_img(y_true, center_crop=center_crop)
 
         inter = get_intersection(y_true, y_pred)
         alls = get_alls(y_true, y_pred)
