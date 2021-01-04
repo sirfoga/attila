@@ -12,7 +12,7 @@ def eps_divide(n, d, eps=K.epsilon()):
     return (n + eps) / (d + eps)
 
 
-def cast_threshold(x, threshold):
+def threshold01(x, threshold):
     return K.cast(K.greater(x, threshold), dtype='float32')
 
 
@@ -25,7 +25,7 @@ def get_binary_img(x, threshold=0.5, center_crop=0, n_classes=2):
         axis=-1
     )
     x = K.expand_dims(x, axis=-1)  # restore axis
-    x = cast_threshold(x, threshold)
+    x = threshold01(x, threshold)
     return x  # (batch size, height, width, 1)
 
 
@@ -84,7 +84,6 @@ def mean_IoU(threshold=0.5, center_crop=0):
 
         inter = get_intersection(y_true, y_pred)
         union = get_alls(y_true, y_pred) - inter
-
         batch_metric = eps_divide(inter, union)
         return K.mean(batch_metric)
 
@@ -92,7 +91,7 @@ def mean_IoU(threshold=0.5, center_crop=0):
     return _f
 
 
-def DSC(smooth=1.0, threshold=0.5):
+def DSC(smooth=1.0, threshold=0.5, center_crop=0):
     """
     - y_true is a 2D array representing the ground truth BINARY image
     - y_pred is a 2D array representing the predicted BINARY image
@@ -115,11 +114,6 @@ def DSC(smooth=1.0, threshold=0.5):
 
         inter = get_intersection(y_true, y_pred)
         alls = get_alls(y_true, y_pred)
-
-        if not is_from_batch(y_true):
-            inter = inter.numpy().sum()
-            alls = alls.numpy().sum()
-
         batch_metric = eps_divide(2.0 * inter + smooth, alls + smooth)
         return K.mean(batch_metric)
 
