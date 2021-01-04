@@ -72,7 +72,7 @@ def main():
         learning_rates = np.logspace(-6, -2, 10)
         
         for learning_rate in learning_rates:
-            exp_name = '{:.3f}'.format(learning_rate)
+            exp_name = '{:.10f}'.format(learning_rate)
             print('doing "{}" experiment'.format(exp_name))
 
             _do_it(exp_name, learning_rate)
