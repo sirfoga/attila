@@ -139,6 +139,7 @@ def plot_preds(summary, cmap, out_folder=None):
 
         plt.imshow(pred, cmap='gray')
         plt.contour(y, colors='red', levels=[0.5])
+
         if out_folder:
             out_f = out_folder / 'pred_{}.png'.format(i)
             plt.gcf().savefig(out_f)

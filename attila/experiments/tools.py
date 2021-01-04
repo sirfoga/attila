@@ -9,7 +9,7 @@ from attila.util.io import append_rows2text, load_pickle
 def experiment2tex(summary, metric_keys=['attila_metrics_mean_IoU', 'attila_metrics_DSC']):
     out = {}
 
-    results = summary['stats']  # evaluation statistics
+    results = summary['stats']  # statistics on test data
     for key in metric_keys:
         out[key] = {
             'all': results[key],

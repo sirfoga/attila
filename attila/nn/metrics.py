@@ -16,38 +16,55 @@ def cast_threshold(x, threshold):
     return K.cast(K.greater(x, threshold), dtype='float32')
 
 
-def get_binary_img(x, threshold=0.5):
+def get_binary_img(x, threshold=0.5, center_crop=0):
     # hacky way to enforce same size metrics not depending on padding
-    valid_padding_size = 324
-    x = CenterCrop(valid_padding_size, valid_padding_size)(x)
+    if center_crop > 0:
+        x = CenterCrop(center_crop, center_crop)(x)
 
-    # hacky way to compute: consider only foreground + borders
+    if x.shape[-1] > 1:
+        # hacky way to compute: consider only foreground + borders
+        x = K.sum(  # sum all channels ...
+            x[..., :-1],  # ... apart background (implicitely you also sum it, since it's a probability distribution)
+            axis=-1
+        )
+        x = K.expand_dims(x, axis=-1)  # restore axis
 
-    x = K.sum(  # sum all channels ...
-        x[..., :-1],  # ... apart background (implicitely you also sum it, since it's a probability distribution)
-        axis=-1
-    )
-    x = K.expand_dims(x, axis=-1)  # restore axis
     x = cast_threshold(x, threshold)
-
     return x  # (batch size, height, width, 1)
 
 
 def get_intersection(y_true, y_pred):
     """ aka TP, assuming binary images that were removed the background """
 
-    return K.sum(K.squeeze(y_true * y_pred, axis=-1), axis=-1)
+    return K.sum(K.sum(K.squeeze(y_true * y_pred, axis=-1), axis=-1), axis=-1)
 
 
 def get_alls(y_true, y_pred):
     """ aka TP + TP + FP + FN, assuming binary images that were removed the background """
 
-    return K.sum(K.squeeze(y_true + y_pred, axis=-1), axis=-1)
+    return K.sum(K.sum(K.squeeze(y_true + y_pred, axis=-1), axis=-1), axis=-1)
 
 
 def is_from_batch(x):
     return len(x.shape) == 4  # bs size, x, y, ch
 
+
+def has_missing_batch(x):
+    return not is_from_batch(x) and x.shape[-1] < 10  # last shape is channel
+
+
+def has_missing_channel(x):
+    return not is_from_batch(x) and x.shape[-1] > 10
+
+
+def fix_input(x):
+    if has_missing_batch(x):
+        x = K.expand_dims(x, axis=0)  # add "batch axis"
+    
+    if has_missing_channel(x):
+        x = K.expand_dims(x, axis=-1)  # add "channel axis"
+
+    return x
 
 def mean_IoU(threshold=0.5):
     """
@@ -56,21 +73,14 @@ def mean_IoU(threshold=0.5):
     """
 
     def _f(y_true, y_pred):
-        if not is_from_batch(y_true):
-            y_true = K.expand_dims(y_true, axis=0)  # add "batch axis"
-        
-        if not is_from_batch(y_pred):
-            y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
+        y_true = fix_input(y_true)
+        y_pred = fix_input(y_pred)
 
-        y_true = get_binary_img(y_true)
-        y_pred = get_binary_img(y_pred)
+        y_true = get_binary_img(y_true, center_crop=324)
+        y_pred = get_binary_img(y_pred, center_crop=324)
 
         inter = get_intersection(y_true, y_pred)
         union = get_alls(y_true, y_pred) - inter
-
-        if not is_from_batch(y_true):
-            inter = inter.numpy().sum()
-            union = union.numpy().sum()
 
         return eps_divide(inter, union)
 
@@ -91,8 +101,8 @@ def DSC(smooth=1.0, threshold=0.5):
         if not is_from_batch(y_pred):
             y_pred = K.expand_dims(y_pred, axis=0)  # add "batch axis"
 
-        y_pred = get_binary_img(y_pred)
-        y_true = get_binary_img(y_true)
+        y_pred = get_binary_img(y_pred, center_crop=324)
+        y_true = get_binary_img(y_true, center_crop=324)
 
         inter = get_intersection(y_true, y_pred)
         alls = get_alls(y_true, y_pred)
