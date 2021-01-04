@@ -73,7 +73,7 @@ def main():
         learning_rates = np.logspace(-6, -2, 10)
         
         for learning_rate in learning_rates:
-            exp_name = 'no-aug-{:.3f}'.format(val_size)
+            exp_name = '{:.3f}'.format(val_size)
             _do_it(exp_name, learning_rate)
 
     if not are_gpu_avail():  # only with CPU
