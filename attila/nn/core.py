@@ -41,13 +41,5 @@ def do_evaluation(model, data):
         gen,
         steps=len(y_test)
     )
-
-    stats = {
-        metric['name']: metric['callback'](
-            K.cast(y_test, dtype='float32'),
-            K.cast(preds, dtype='float32')
-        )
-        for metric in metrics
-    }
     
-    return stats, preds
+    return preds

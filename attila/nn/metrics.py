@@ -45,7 +45,7 @@ def is_from_batch(x):
 
 
 def has_missing_batch(x):
-    return not is_from_batch(x) and x.shape[-1] < 10  # last shape is channel
+    return not is_from_batch(x) and x.shape[0] > 128  # last shape is channel
 
 
 def has_missing_channel(x):
@@ -61,7 +61,7 @@ def fix_input(x):
 
     return x
 
-def mean_IoU(threshold=0.5, center_crop=0):
+def mean_IoU(threshold=0.5, center_crop=0, get_batch_mean=True):
     """
     - y_true is a 3D array. Each channel represents the ground truth BINARY channel
     - y_pred is a 3D array. Each channel represents the predicted BINARY channel
@@ -85,13 +85,17 @@ def mean_IoU(threshold=0.5, center_crop=0):
         inter = get_intersection(y_true, y_pred)
         union = get_alls(y_true, y_pred) - inter
         batch_metric = eps_divide(inter, union)
-        return K.mean(batch_metric)
+        
+        if get_batch_mean:
+            return K.mean(batch_metric, axis=-1)
+
+        return batch_metric
 
     _f.__name__ = 'attila_metrics_{}'.format('mean_IoU')
     return _f
 
 
-def DSC(smooth=1.0, threshold=0.5, center_crop=0):
+def DSC(smooth=1.0, threshold=0.5, center_crop=0, get_batch_mean=True):
     """
     - y_true is a 2D array representing the ground truth BINARY image
     - y_pred is a 2D array representing the predicted BINARY image
@@ -115,7 +119,11 @@ def DSC(smooth=1.0, threshold=0.5, center_crop=0):
         inter = get_intersection(y_true, y_pred)
         alls = get_alls(y_true, y_pred)
         batch_metric = eps_divide(2.0 * inter + smooth, alls + smooth)
-        return K.mean(batch_metric)
+        
+        if get_batch_mean:
+            return K.mean(batch_metric, axis=-1)
+
+        return batch_metric
 
     _f.__name__ = 'attila_metrics_{}'.format('DSC')
 

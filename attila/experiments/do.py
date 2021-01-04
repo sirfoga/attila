@@ -13,7 +13,7 @@ from attila.nn.metrics import mean_IoU, DSC, calc_accuracy
 from attila.nn.losses import weighted_categorical_crossentropy
 
 from attila.data.prepare import get_weights_file, get_model_output_folder, describe
-from attila.data.transform import crop_center_transformation
+from attila.data.transform import crop_center_transformation, normalize_transformation
 from attila.data.augment import do_augment
 
 from attila.util.config import is_verbose
@@ -37,7 +37,7 @@ def get_default_args(config):
         filter_mult=config.getint('unet', 'filter mult'),
     )
 
-    magic_learning_rate = 3e-4
+    magic_learning_rate = 2e-5
     loss_weights = np.ones(config.getint('image', 'n classes'))
     
     compile_args = dict(
@@ -245,11 +245,11 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
             X_test,
             phase='evaluation'
         )
-        stats, preds = do_evaluation(
+
+        preds = do_evaluation(
             model,
             (gen, y_test)
         )
-
         preds = extract_preds(
             X_test,
             y_test,
@@ -259,8 +259,11 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
 
         return {
             'history': dict2numpy(results.history),
-            'stats': dict2numpy(stats),
-            'preds': [ np.float32(x) for x in preds ]  # maybe different size
+            'preds': [
+                np.float32(
+                    normalize_transformation((0, 1))(x)  # ensure 0-1 pixels
+                ) for x in preds
+            ]
         }
 
     return {}

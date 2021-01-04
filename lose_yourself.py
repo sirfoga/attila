@@ -69,7 +69,7 @@ def main():
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
-        learning_rates = np.logspace(-6, -2, 10)
+        learning_rates = np.logspace(-6, -2, 20)
         
         for learning_rate in learning_rates:
             exp_name = '{:.10f}'.format(learning_rate)

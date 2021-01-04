@@ -74,7 +74,7 @@ def main():
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
-        val_sizes = np.linspace(0.1, 1.0, 10)
+        val_sizes = np.linspace(0.1, 0.99, 20)
         
         for val_size in val_sizes:
             exp_name = 'no-aug-{:.3f}'.format(val_size)

@@ -42,6 +42,9 @@ def make_tex(models_config, config, out_path):
         for model_folder in dirs(run_folder):
             summary = get_summary(model_folder, config)
             name, summary = experiment2tex(summary)
+            if name is None:
+                name = model_folder  # todo parse folder name
+
             run_results[name] = summary
 
         all_runs.append(run_results)
