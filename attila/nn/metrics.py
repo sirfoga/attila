@@ -24,9 +24,7 @@ def get_binary_img(x, threshold=0.5, center_crop=0, n_classes=2):
         x[..., :n_classes],  # consider only first N classes
         axis=-1
     )
-    print(x.shape)
     x = K.expand_dims(x, axis=-1)  # restore axis
-
     x = cast_threshold(x, threshold)
     return x  # (batch size, height, width, 1)
 
@@ -34,13 +32,12 @@ def get_binary_img(x, threshold=0.5, center_crop=0, n_classes=2):
 def get_intersection(y_true, y_pred):
     """ aka TP, assuming binary images that were removed the background """
 
-    return K.sum(K.sum(K.squeeze(y_true * y_pred, axis=-1), axis=-1), axis=-1)
-
+    return K.sum(K.sum(K.squeeze(y_true * y_pred, axis=3), axis=2), axis=1)
 
 def get_alls(y_true, y_pred):
     """ aka TP + TP + FP + FN, assuming binary images that were removed the background """
 
-    return K.sum(K.sum(K.squeeze(y_true + y_pred, axis=-1), axis=-1), axis=-1)
+    return K.sum(K.sum(K.squeeze(y_true + y_pred, axis=3), axis=2), axis=1)
 
 
 def is_from_batch(x):
@@ -74,13 +71,22 @@ def mean_IoU(threshold=0.5, center_crop=0):
         y_true = fix_input(y_true)
         y_pred = fix_input(y_pred)
 
-        y_true = get_binary_img(y_true, center_crop=center_crop)
-        y_pred = get_binary_img(y_pred, center_crop=center_crop)
+        y_true = get_binary_img(
+            y_true,
+            threshold=threshold,
+            center_crop=center_crop
+        )
+        y_pred = get_binary_img(
+            y_pred,
+            threshold=threshold,
+            center_crop=center_crop
+        )
 
         inter = get_intersection(y_true, y_pred)
         union = get_alls(y_true, y_pred) - inter
 
-        return eps_divide(inter, union)
+        batch_metric = eps_divide(inter, union)
+        return K.mean(batch_metric)
 
     _f.__name__ = 'attila_metrics_{}'.format('mean_IoU')
     return _f
@@ -96,8 +102,16 @@ def DSC(smooth=1.0, threshold=0.5):
         y_true = fix_input(y_true)
         y_pred = fix_input(y_pred)
 
-        y_pred = get_binary_img(y_pred, center_crop=center_crop)
-        y_true = get_binary_img(y_true, center_crop=center_crop)
+        y_true = get_binary_img(
+            y_true,
+            threshold=threshold,
+            center_crop=center_crop
+        )
+        y_pred = get_binary_img(
+            y_pred,
+            threshold=threshold,
+            center_crop=center_crop
+        )
 
         inter = get_intersection(y_true, y_pred)
         alls = get_alls(y_true, y_pred)
@@ -106,7 +120,8 @@ def DSC(smooth=1.0, threshold=0.5):
             inter = inter.numpy().sum()
             alls = alls.numpy().sum()
 
-        return eps_divide(2.0 * inter + smooth, alls + smooth)
+        batch_metric = eps_divide(2.0 * inter + smooth, alls + smooth)
+        return K.mean(batch_metric)
 
     _f.__name__ = 'attila_metrics_{}'.format('DSC')
 
