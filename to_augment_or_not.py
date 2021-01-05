@@ -30,7 +30,7 @@ def main():
         (config.getint('image', 'width'), config.getint('image', 'height'))
     )
 
-    config.set('experiments', 'test size', '0.80')  # or any other big amount (< 1)
+    config.set('experiments', 'test size', '0.20')
 
     X_train, X_test, y_train, y_test = get_train_test_split(
         X, 
@@ -74,7 +74,7 @@ def main():
             out_f = out_folder / config.get('experiments', 'output file')
             stuff2pickle(summary, out_f)
 
-        val_sizes = np.linspace(0.1, 0.99, 20)
+        val_sizes = np.linspace(0.05, 0.95, 20)
         
         for val_size in val_sizes:
             exp_name = 'no-aug-{:.3f}'.format(val_size)

@@ -260,9 +260,8 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
         return {
             'history': dict2numpy(results.history),
             'preds': [
-                np.float32(
-                    normalize_transformation((0, 1))(x)  # ensure 0-1 pixels
-                ) for x in preds
+                normalize_transformation((0, 1))(np.float32(x))  # ensure 0-1 pixels
+                for x in preds
             ]
         }
 
