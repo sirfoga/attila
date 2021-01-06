@@ -12,7 +12,7 @@ from attila.nn.core import do_training, do_evaluation
 from attila.nn.metrics import mean_IoU, DSC, calc_accuracy
 from attila.nn.losses import weighted_categorical_crossentropy
 
-from attila.data.prepare import get_weights_file, get_model_output_folder, describe
+from attila.data.prepare import get_weights_file, get_model_output_folder, describe, get_train_test_split
 from attila.data.transform import crop_center_transformation, normalize_transformation
 from attila.data.augment import do_augment
 
@@ -110,10 +110,11 @@ def do_experiment(experiment, data, split_seed, config, plot_ids, optimizer=None
 
 
             # do the train/test split
-            X_train, X_val, y_train, y_val = train_test_split(
-                X, y,
-                test_size=config.getfloat('experiments', 'val size'),
-                random_state=split_seed
+            X_train, X_val, y_train, y_val = get_train_test_split(
+                X, y, 
+                config.getfloat('experiments', 'val size'),
+                random_state=split_seed, 
+                verbose=True
             )
 
             seed = np.random.randint(0, 42)
@@ -293,14 +294,12 @@ def do_experiments(experiments, data, split_seed, config, out_folder, plot_ids):
 def do_batch_experiments(experiments, data, config, out_folder):
     nruns = config.getint('experiments', 'nruns')
     (X, y) = data  # unpack
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=config.getfloat('experiments', 'test size'),
-        random_state=42  # reproducible results
+    X_train, X_test, y_train, y_test = get_train_test_split(
+        X, y, 
+        config.getfloat('experiments', 'test size'),
+        random_state=42,  # reproducible results
+        verbose=True
     )
-    if is_verbose('experiments', config):
-        print('training data: X ~ {}, y ~ {}'.format(X_train.shape, y_train.shape))
-        print('testing data: X ~ {}, y ~ {}'.format(X_test.shape, y_test.shape))
 
     num_plots = 4
     plot_ids = np.random.randint(len(X_test), size=num_plots)

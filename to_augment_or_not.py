@@ -9,7 +9,6 @@ from attila.experiments.do import do_batch_experiments, do_experiment
 from attila.util.config import get_env
 from attila.util.io import load_json, stuff2pickle, dirs, get_summary
 from attila.util.plots import extract_preds, plot_history, plot_preds
-from attila.experiments.tools import experiment2tex
 from attila.util.ml import are_gpu_avail
 
 _here = Path('.').resolve()
@@ -87,17 +86,6 @@ def main():
             print('doing "{}" experiment'.format(exp_name))
 
             _do_it(exp_name, val_size, True)
-
-    if not are_gpu_avail():  # only with CPU
-        for folder in dirs(out_path / 'trials' / 'to-aug-or-not'):
-            summary = get_summary(folder, config)
-            
-            _, results = experiment2tex(summary)
-            for key, vals in results.items():
-                vals = vals['all']
-                print('{} (based on {} samples): {:.3f} +- {:.3f}'.format(key, len(vals), vals.mean(), vals.std()))
-
-        # todo plot
 
 
 if __name__ == '__main__':

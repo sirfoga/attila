@@ -77,54 +77,6 @@ def main():
 
             _do_it(exp_name, learning_rate)
 
-    if not are_gpu_avail():  # only with CPU
-        metrics = [
-            {
-                'name': 'attila_metrics_mean_IoU',
-                'callback': mean_IoU(get_batch_mean=False)
-            },
-            {
-                'name': 'attila_metrics_DSC',
-                'callback': DSC(get_batch_mean=False)
-            }
-        ]
-
-        results = {
-            m: {
-                'mean': [],
-                'std': []
-            }
-            for m in [ x['name'] for x in metrics]
-        }
-        learning_rates = []
-        
-        for folder in dirs(out_path / 'trials' / 'lost'):
-            summary = get_summary(folder, config)
-            
-            y_true_batch = summary['preds'][1]
-            y_pred_batch = summary['preds'][2]
-
-            for m in metrics:
-                key = m['name']
-                f = m['callback']
-
-                vals = f(
-                    normalize_transformation((0, 1))(y_true_batch),
-                    normalize_transformation((0, 1))(y_pred_batch)
-                ).numpy()
-
-                learning_rates.append(np.float32(Path(folder).name))
-                results[key]['mean'].append(vals.mean())
-                results[key]['mean'].append(vals.std())
-
-        for m in metrics:
-            key = m['name']
-            plt.errorbar(
-                learning_rates,
-                results[key]['mean'],
-                yerr=results[key]['std']
-            )  # todo customize
-
 
 if __name__ == '__main__':
   main()
