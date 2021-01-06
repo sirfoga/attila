@@ -1,3 +1,4 @@
+*.pkl
 *.bak
 */__pycache__/*
 data/
