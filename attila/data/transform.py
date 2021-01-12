@@ -85,36 +85,42 @@ def get_background(foreground):
     return out
 
 
-def get_foreground(img, borders):
+def get_foreground(img, borders=None):
     """ gets foreground of grayscale img """
 
     out = img.copy()
 
-    out = out + borders
+    if not (borders is None):
+        out = out + borders
+    
     out[out > 1] = 0  # borders
     out[out < 1] = 0  # background
 
     return out
 
 
-def img2channels():
+def img2channels(n_channels_mask):
     """ splits grayscale 2d img -> channels: background, foreground, borders ..."""
 
     def _f(x):
-        borders = get_borders(x)
-        foreground = get_foreground(x, borders)
-        background = get_background(foreground + borders)
+        if n_channels_mask == 1:
+            foreground = get_foreground(x)
+            out = add_dim()(foreground)
+        elif n_channels_mask == 3:
+            borders = get_borders(x)
+            foreground = get_foreground(x, borders)
+            background = get_background(foreground + borders)
 
-        out = np.append(
-            add_dim()(foreground),
-            add_dim()(borders),
-            axis=-1
-        )
-        out = np.append(
-            out,
-            add_dim()(background),
-            axis=-1
-        )
+            out = np.append(
+                add_dim()(foreground),
+                add_dim()(borders),
+                axis=-1
+            )
+            out = np.append(
+                out,
+                add_dim()(background),
+                axis=-1
+            )
 
         return out  # each pixels is a one-hot vector
 

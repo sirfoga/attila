@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 
 def get_figsize(n_rows, n_cols):
     row_size = 8  # heigth
-    column_size = 20  # width
+    column_size = 5  # width
 
     return (n_cols * column_size, n_rows * row_size)
 

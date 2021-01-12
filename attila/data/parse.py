@@ -38,15 +38,22 @@ def get_data(imgs_path, masks_path, extension='.tif'):
     return images, masks
 
 
-def parse_data(raw, img_shape):
+def parse_data(raw, img_shape=None, n_channels_mask=1):
     (X, y) = raw
 
     base_transformations = [
         np.array,  # just in case parser did not np.array-ed
         rm_percentiles_transformation(2, 98),  # threshold outliers
-        crop_center_transformation(img_shape),
-        normalize_transformation((0, 1)),
     ]
+
+    if img_shape:
+        base_transformations.append(
+            crop_center_transformation(img_shape)
+        )
+    
+    base_transformations.append(
+        normalize_transformation((0, 1))
+    )
 
     X = do_transformations(
         X,
@@ -55,7 +62,7 @@ def parse_data(raw, img_shape):
 
     y = do_transformations(
         y,
-        base_transformations + [img2channels()]
+        base_transformations + [img2channels(n_channels_mask)]
     )
 
     return X, y
