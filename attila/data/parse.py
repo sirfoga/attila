@@ -16,7 +16,7 @@ def load_mask(f):
     return load_tiff(f)
 
 
-def get_data(imgs_path, masks_path, extension='.tif'):
+def get_data(imgs_path, masks_path=None, extension='.tif'):
     list_imgs = [
         f
         for f in imgs_path.iterdir()
@@ -28,12 +28,12 @@ def get_data(imgs_path, masks_path, extension='.tif'):
 
     for img_path in list_imgs:
         img = load_image(img_path).squeeze()
-
-        mask_path = str(img_path).replace(str(imgs_path), str(masks_path)).replace('img_', 'mask_')
-        mask = load_mask(mask_path)
-
         images.append(np.array(img))
-        masks.append(np.array(mask))
+
+        if masks_path:
+            mask_path = str(img_path).replace(str(imgs_path), str(masks_path)).replace('img_', 'mask_')
+            mask = load_mask(mask_path)
+            masks.append(np.array(mask))
 
     return images, masks
 

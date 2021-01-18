@@ -19,6 +19,8 @@ conda install ipykernel
 python -m ipykernel install --user --name "${KERNEL_NAME}"
 
 # optional: install other packages (don't need to be in srun)
+# source /sw/installed/Anaconda3/2019.03/etc/profile.d/conda.sh
+# conda activate ${KERNELS_DIR}/${KERNEL_NAME}
 # conda install tifffile
 # conda install scikit-learn
 # conda install matplotlib

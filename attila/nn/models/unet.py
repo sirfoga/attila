@@ -129,7 +129,7 @@ def up_conv(pool_shape, conv_args, using_skip_conn):
 
         if using_skip_conn:
             x = conv2d_block(**conv_args)(x)
-        
+
         return x
 
     return _f
@@ -168,7 +168,7 @@ def expanding_block(n_filters, skip_conn, kernel_shape, pool_shape, padding, use
             batchnorm,
             inner_layers=conv_inner_layers
         )(x)
-        
+
         return x
 
     return _f
